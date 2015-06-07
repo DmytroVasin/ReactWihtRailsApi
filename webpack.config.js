@@ -1,7 +1,7 @@
 module.exports = {
   entry: ['./app_react/app.jsx'],
   output: {
-    path: './app/assets/javascripts',
+    path: './public',
     filename: 'bundled.js'
   },
   module: {

@@ -5,7 +5,7 @@ module V1
     # POST /v1/login
     def create
       @user = User.find_for_database_authentication(email: params[:user][:email])
-      binding.pry
+
       return invalid_login_attempt unless @user
 
       if @user.valid_password?(params[:user][:password])

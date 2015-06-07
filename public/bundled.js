@@ -57,16 +57,10 @@
   \***************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	// require('./assets/app.css');
-	// require('./assets/menu.css');
-	// require('./assets/blabs.css');
-	
 	var React = __webpack_require__(/*! react */ 2);
-	// var Router = require('react-router');
+	var router = __webpack_require__(/*! ./stores/route_store.jsx */ 149).getRouter();
 	
-	var routes = __webpack_require__(/*! ./config/routes.jsx */ 149);
-	
-	Router.run(routes, Router.HistoryLocation, function(Handler) {
+	router.run(function(Handler) {
 	  React.render(React.createElement(Handler, null), document.body);
 	});
 
@@ -19365,30 +19359,25 @@
 
 /***/ },
 /* 149 */
-/*!*************************************!*\
-  !*** ./app_react/config/routes.jsx ***!
-  \*************************************/
+/*!******************************************!*\
+  !*** ./app_react/stores/route_store.jsx ***!
+  \******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(/*! react */ 2);
-	
 	var Router = __webpack_require__(/*! react-router */ 150);
-	var Route = Router.Route;
-	var DefaultRoute = Router.DefaultRoute;
+	var routes = __webpack_require__(/*! ../routes.jsx */ 191);
+	var assign = __webpack_require__(/*! object-assign */ 199);
 	
 	
-	var App = __webpack_require__(/*! ../components/layout/app.jsx */ 191);
+	var router = Router.create(routes, Router.HistoryLocation)
 	
-	var PostsView = __webpack_require__(/*! ../components/posts/view.jsx */ 194);
-	var AboutView = __webpack_require__(/*! ../components/static/about_view.jsx */ 197);
+	var RouteStore = assign({}, {
+	  getRouter: function() {
+	    return router;
+	  }
+	});
 	
-	
-	module.exports = (
-	  React.createElement(Route, {name: "app", path: "/", handler: App}, 
-	    React.createElement(DefaultRoute, {name: "blabs", handler: PostsView}), 
-	    React.createElement(Route, {name: "about", handler: AboutView})
-	  )
-	);
+	module.exports = RouteStore;
 
 
 /***/ },
@@ -22494,6 +22483,32 @@
 
 /***/ },
 /* 191 */
+/*!******************************!*\
+  !*** ./app_react/routes.jsx ***!
+  \******************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 2);
+	var Router = __webpack_require__(/*! react-router */ 150);
+	var Route = Router.Route;
+	var DefaultRoute = Router.DefaultRoute;
+	
+	
+	var App = __webpack_require__(/*! ./components/layout/app.jsx */ 192);
+	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 195);
+	var AboutView = __webpack_require__(/*! ./components/static/about_view.jsx */ 198);
+	
+	
+	module.exports = (
+	  React.createElement(Route, {name: "app", path: "/", handler: App}, 
+	    React.createElement(DefaultRoute, {name: "blabs", handler: PostsView}), 
+	    React.createElement(Route, {name: "about", handler: AboutView})
+	  )
+	);
+
+
+/***/ },
+/* 192 */
 /*!*********************************************!*\
   !*** ./app_react/components/layout/app.jsx ***!
   \*********************************************/
@@ -22501,9 +22516,9 @@
 
 	var React = __webpack_require__(/*! react */ 2);
 	var Router = __webpack_require__(/*! react-router */ 150);
-	var Reqwest = __webpack_require__(/*! reqwest */ 192);
+	var Reqwest = __webpack_require__(/*! reqwest */ 193);
 	
-	var Menu = __webpack_require__(/*! ./menu.jsx */ 193);
+	var Menu = __webpack_require__(/*! ./menu.jsx */ 194);
 	
 	var RouteHandler = Router.RouteHandler;
 	
@@ -22548,7 +22563,7 @@
 
 
 /***/ },
-/* 192 */
+/* 193 */
 /*!******************************!*\
   !*** ./~/reqwest/reqwest.js ***!
   \******************************/
@@ -23172,7 +23187,7 @@
 
 
 /***/ },
-/* 193 */
+/* 194 */
 /*!**********************************************!*\
   !*** ./app_react/components/layout/menu.jsx ***!
   \**********************************************/
@@ -23204,14 +23219,14 @@
 
 
 /***/ },
-/* 194 */
+/* 195 */
 /*!*********************************************!*\
   !*** ./app_react/components/posts/view.jsx ***!
   \*********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(/*! react */ 2);
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 195);
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 196);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  getInitialState: function() {
@@ -23236,14 +23251,14 @@
 
 
 /***/ },
-/* 195 */
+/* 196 */
 /*!*********************************************!*\
   !*** ./app_react/components/posts/list.jsx ***!
   \*********************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(/*! react */ 2);
-	var Post = __webpack_require__(/*! ./post.jsx */ 196);
+	var Post = __webpack_require__(/*! ./post.jsx */ 197);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  render: function() {
@@ -23263,7 +23278,7 @@
 
 
 /***/ },
-/* 196 */
+/* 197 */
 /*!*********************************************!*\
   !*** ./app_react/components/posts/post.jsx ***!
   \*********************************************/
@@ -23285,7 +23300,7 @@
 
 
 /***/ },
-/* 197 */
+/* 198 */
 /*!****************************************************!*\
   !*** ./app_react/components/static/about_view.jsx ***!
   \****************************************************/
@@ -23303,6 +23318,52 @@
 	    );
 	  }
 	});
+
+
+/***/ },
+/* 199 */
+/*!**********************************!*\
+  !*** ./~/object-assign/index.js ***!
+  \**********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+	
+		return Object(val);
+	}
+	
+	module.exports = Object.assign || function (target, source) {
+		var pendingException;
+		var from;
+		var keys;
+		var to = ToObject(target);
+	
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+	
+			for (var i = 0; i < keys.length; i++) {
+				try {
+					to[keys[i]] = from[keys[i]];
+				} catch (err) {
+					if (pendingException === undefined) {
+						pendingException = err;
+					}
+				}
+			}
+		}
+	
+		if (pendingException) {
+			throw pendingException;
+		}
+	
+		return to;
+	};
 
 
 /***/ }

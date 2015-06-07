@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
   include AbstractController::Translation # WTF ?
 
-  before_action :authenticate_user_from_token! # WTF ?
+  # before_action :authenticate_user_from_token! # WTF ?
 
   respond_to :json
 
