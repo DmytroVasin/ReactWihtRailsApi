@@ -1,5 +1,6 @@
 var React = require('react');
 var Router = require('react-router');
+var SessionActionCreators = require('../../actions/SessionActionCreators.jsx');
 
 var Link = Router.Link;
 
@@ -9,8 +10,8 @@ module.exports = React.createClass({
     email:      React.PropTypes.string
   },
 
-  logout: function() {
-    console.log('Log out!');
+  logout: function(e) {
+    SessionActionCreators.logout();
   },
 
   render: function() {

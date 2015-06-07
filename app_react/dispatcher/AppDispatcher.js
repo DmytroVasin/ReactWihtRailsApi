@@ -11,6 +11,14 @@ var AppDispatcher = assign(new Dispatcher(), {
       action: action
     };
     this.dispatch(payload);
+  },
+  handleViewAction: function(action) {
+    var payload = {
+      // source: PayloadSources.VIEW_ACTION,
+      source: null,
+      action: action
+    };
+    this.dispatch(payload);
   }
 });
 

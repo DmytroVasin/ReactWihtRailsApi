@@ -1,7 +1,9 @@
 var assign = require('object-assign');
+var ActionTypes = require('../constants/Constants.js').ActionTypes;
 
 var AppDispatcher = require('../dispatcher/AppDispatcher.js');
 var EventEmitter = require('events').EventEmitter;
+
 
 // Load an access token from the session storage, you might want to implement
 // a 'remember me' using localSgorage
@@ -34,20 +36,35 @@ var SessionStore = assign({}, EventEmitter.prototype, {
 SessionStore.dispatchToken = AppDispatcher.register(function(payload) {
   var action = payload.action;
 
-  if (action.json && action.json.access_token) {
-    _accessToken = action.json.access_token;
-    _email = action.json.email;
+  switch(action.type) {
+    case ActionTypes.LOGIN_RESPONSE:
+      if (action.json && action.json.access_token) {
+        _accessToken = action.json.access_token;
+        _email = action.json.email;
 
-    // Token will always live in the session, so that the API can grab it with no hassle
-    sessionStorage.setItem('accessToken', _accessToken);
-    sessionStorage.setItem('email', _email);
+        // Token will always live in the session, so that the API can grab it with no hassle
+        sessionStorage.setItem('accessToken', _accessToken);
+        sessionStorage.setItem('email', _email);
+      }
+
+      if (action.errors) {
+        _errors = action.errors;
+      }
+
+      SessionStore.emitChange();
+      break;
+
+    case ActionTypes.LOGOUT:
+      _accessToken = null;
+      _email = null;
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('email');
+
+      SessionStore.emitChange();
+      break;
+
+    default:
   }
-
-  if (action.errors) {
-    _errors = action.errors;
-  }
-
-  SessionStore.emitChange();
 
   return true;
 });
