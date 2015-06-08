@@ -1,45 +1,28 @@
-var React = require('react');
-var RouteHandler = require('react-router').RouteHandler;
-var SessionStore = require('../../stores/SessionStore.jsx');
+'use strict';
 
-// var Reqwest = require('reqwest');
+var React = require('react');
+var Reflux = require('reflux');
+
+var RouteHandler = require('react-router').RouteHandler;
+var LoginStore = require('../../stores/LoginStore');
 
 var Menu = require('./menu.jsx');
 
 function getStateFromStores() {
   return {
-    isLoggedIn: SessionStore.isLoggedIn(),
-    email: SessionStore.getEmail()
+    isLoggedIn: LoginStore.isLoggedIn(),
+    email: LoginStore.getEmail()
   };
 }
 
 module.exports = React.createClass({
+  mixins: [
+    Reflux.listenTo(LoginStore, '_onChange')
+  ],
+
   getInitialState: function() {
     return getStateFromStores();
   },
-  readFromAPI: function(url, successFunction) {
-    // Reqwest({
-    //   url: url,
-    //   type: 'json',
-    //   method: 'get',
-
-    //   success: successFunction,
-    //   error: function(error) {
-    //     location = '/';
-    //   }
-    // });
-  },
-
-  // ------
-  // listen to changes! fro update menu!
-  componentDidMount: function() {
-    SessionStore.addChangeListener(this._onChange);
-  },
-
-  componentWillUnmount: function() {
-    SessionStore.removeChangeListener(this._onChange);
-  },
-  // ------
 
   _onChange: function() {
     this.setState( getStateFromStores() );

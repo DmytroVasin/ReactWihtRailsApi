@@ -3,8 +3,8 @@
     "devbuild": "webpack -w -d --config webpack.config.js --profile --progress --colors"
   },
   "dependencies": {
-    "flux": "^2.0.0",
     "react": "^0.12.2",
+    "reflux": "^0.2.7",
     "react-router": "^0.12.4",
     "object-assign": "^1.0.0",
     "webpack": "^1.6.0",

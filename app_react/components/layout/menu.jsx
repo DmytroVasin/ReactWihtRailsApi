@@ -1,6 +1,9 @@
+'use strict';
+
 var React = require('react');
 var Router = require('react-router');
-var SessionActionCreators = require('../../actions/SessionActionCreators.jsx');
+
+var actions = require('../../actions/actions');
 
 var Link = Router.Link;
 
@@ -11,7 +14,8 @@ module.exports = React.createClass({
   },
 
   logout: function(e) {
-    SessionActionCreators.logout();
+    // e.preventDefault();
+    actions.logout();
   },
 
   render: function() {
