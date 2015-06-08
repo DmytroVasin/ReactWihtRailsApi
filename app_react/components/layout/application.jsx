@@ -16,9 +16,10 @@ function getStateFromStores() {
 }
 
 module.exports = React.createClass({
-  mixins: [
-    Reflux.listenTo(LoginStore, '_onChange')
-  ],
+  mixins: [Reflux.ListenerMixin],
+  // mixins: [
+  //   Reflux.listenTo(LoginStore, '_onChange')
+  // ],
 
   getInitialState: function() {
     return getStateFromStores();
@@ -26,6 +27,16 @@ module.exports = React.createClass({
 
   _onChange: function() {
     this.setState( getStateFromStores() );
+  },
+
+  componentDidMount: function() {
+    // ---- Какой из этих методов следует юзать?
+
+    // var that = this; // remove that!
+    // LoginStore.listen(function() {
+    //   that._onChange();
+    // })
+    this.listenTo(LoginStore, this._onChange);
   },
 
   render: function () {

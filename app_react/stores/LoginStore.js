@@ -35,7 +35,7 @@ module.exports = Reflux.createStore({
             // error...
           } else {
             var json = JSON.parse(res.text);
-            actions.successLoggin(json);
+            actions.successLoggin(json); // здесь тригериться еще одно событие - что бы можно было сделать this.trigger - это правильно?'
           }
         }
       });
@@ -50,7 +50,7 @@ module.exports = Reflux.createStore({
 
     sessionStorage.setItem('accessToken', _accessToken);
     sessionStorage.setItem('email', _email);
-
+    // если я тут хочу вернуь json и какой-то статус а ниже....
     this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно - какие параметры принимает и как на них реагирует ?
   },
 
@@ -60,7 +60,8 @@ module.exports = Reflux.createStore({
 
     sessionStorage.removeItem('accessToken');
     sessionStorage.removeItem('email');
-
+    // а тут НАПРИМЕР хочу вернуть eror message  - как я их отличу в application.jsx по подписке
+    // тогда не понадобиться танцевать с установкой локальных переменных: _accessToken, _email
     this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно
     // типо он всегда будет дергать - LoginStore.listen(this._onChange)?
   }
