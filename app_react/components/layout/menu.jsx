@@ -19,31 +19,51 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    var Nav = this.props.isLoggedIn ? (
-      <ul>
-        <li>{this.props.email}</li>
-        <li><a href='#' onClick={this.logout}>Logout</a></li>
-      </ul>
+    var RightNavigation = this.props.isLoggedIn ? (
+      <div className='float-right'>
+        <span>
+          <a className='register-link'>{this.props.email}</a>
+        </span>
+        <span>
+          <a className='register-link' onClick={this.logout}>LogOut</a>
+        </span>
+        <a id='panel-toggle' className='panel-toggle'>
+          <span className='sr-only'>Add Post</span>
+        </a>
+      </div>
     ) : (
-      <ul>
-        <li>NO USER!</li>
-      </ul>
+      <div className='float-right'>
+        <span>
+          <Link to='login' className='register-link'>Sign In</Link>
+        </span>
+        <span>
+          <a className='register-link'>Register</a>
+        </span>
+      </div>
     );
 
+
     return (
-      <div id='menu'>
-        <div id='menu-list'>
-          <div className='pure-menu pure-menu-open'>
-            <span className='pure-menu-heading'>Menu</span>
-            {Nav}
-            <ul>
-              <li><Link to='blabs'>Blabs</Link></li>
-              <li><Link to='about'>About</Link></li>
-              <li><Link to='login'>Sign In</Link></li>
-            </ul>
+
+      <header className='header'>
+        <div className='header-main'>
+          <div className='float-left'>
+            <a className='menu-title active' href='#'>react-news</a>
+            <Link to='posts' className='menu-title'>Posts</Link>
+            <Link to='about' className='menu-title'>About</Link>
           </div>
+
+          { RightNavigation }
         </div>
-      </div>
+        <div id='header-panel' className='header-panel text-center'>
+          <form className='panel-form'>
+            <input type='text' className='panel-input' placeholder='Title' />
+            <input type='url' className='panel-input' placeholder='Link' />
+            <button type='submit' className='button panel-button button-outline'>Submit</button>
+          </form>
+        </div>
+      </header>
+
     );
   }
 });

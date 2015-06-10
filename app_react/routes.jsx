@@ -12,7 +12,7 @@ var LoginPage = require('./components/session/LoginPage.jsx');
 
 module.exports = (
   <Route name='app' path='/' handler={App}>
-    <DefaultRoute name='blabs' handler={PostsView} />
+    <DefaultRoute name='posts' handler={PostsView} />
     <Route name='about' handler={AboutView} />
     <Route name='login' path='/login' handler={LoginPage} />
   </Route>

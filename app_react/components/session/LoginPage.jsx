@@ -25,20 +25,22 @@ module.exports = React.createClass({
 
   render: function() {
     return (
-      <div>
-        <form onSubmit={this._onSubmit}>
-          <div>
-            <label name='email'>Email</label>
-            <input type='text' name='email' defaultValue='user@example.com' ref='email' />
-          </div>
+      <div className='md-overlay md-show'>
+        <div className='login text-center md-modal' id='overlay-content'>
+          <form className='login-form text-left' onSubmit={this._onSubmit}>
+            <h1>Login</h1>
 
-          <div>
-            <label name='password'>Password</label>
-            <input type='password' name='password' ref='password' />
-          </div>
+            Email
+            <br />
+            <input type='email' placeholder='Email' defaultValue='user@example.com' ref='email' />
 
-          <button type='submit'>Login</button>
-        </form>
+            Password
+            <br />
+            <input type='password' placeholder='Password' ref='password' />
+
+            <button type='submit' className='button button-primary'>Sign In</button>
+          </form>
+        </div>
       </div>
     );
   }
