@@ -19368,7 +19368,7 @@
 	
 	var Router = __webpack_require__(/*! react-router */ 150);
 	var routes = __webpack_require__(/*! ../routes.jsx */ 191);
-	var assign = __webpack_require__(/*! object-assign */ 226);
+	var assign = __webpack_require__(/*! object-assign */ 227);
 	
 	
 	var router = Router.create(routes, Router.HistoryLocation)
@@ -22494,98 +22494,25 @@
 	var DefaultRoute = Router.DefaultRoute;
 	
 	
-	var App = __webpack_require__(/*! ./components/layout/application.jsx */ 195);
-	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 192);
+	var App = __webpack_require__(/*! ./components/layout/application.jsx */ 192);
+	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 221);
 	var AboutView = __webpack_require__(/*! ./components/static/about_view.jsx */ 224);
 	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 225);
+	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 226);
 	
 	
 	module.exports = (
 	  React.createElement(Route, {name: "app", path: "/", handler: App}, 
 	    React.createElement(DefaultRoute, {name: "posts", handler: PostsView}), 
 	    React.createElement(Route, {name: "about", handler: AboutView}), 
-	    React.createElement(Route, {name: "login", path: "/login", handler: LoginPage})
+	    React.createElement(Route, {name: "login", path: "/login", handler: LoginPage}), 
+	    React.createElement(Route, {name: "signup", path: "/signup", handler: SignUpPage})
 	  )
 	);
 
 
 /***/ },
 /* 192 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/view.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(/*! react */ 2);
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 193);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  getInitialState: function() {
-	    return { data: [] };
-	  },
-	  render: function() {
-	    return (
-	      React.createElement("div", {className: "posts-view"}, 
-	        React.createElement(PostsList, {data: this.state.data})
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 193 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/list.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 2);
-	var Post = __webpack_require__(/*! ./post.jsx */ 194);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    var posts = this.props.data.map(function(post) {
-	      return (
-	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
-	      );
-	    });
-	
-	    return (
-	      React.createElement("ul", {className: "posts-list"}, 
-	        posts
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 194 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/post.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 2);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    return (
-	      React.createElement("li", {className: "post"}, 
-	        React.createElement("span", {className: "post-text"}, this.props.title), ",", 
-	        React.createElement("span", {className: "post-text"}, this.props.body), ",", 
-	        React.createElement("span", {className: "post-text"}, this.props.url)
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 195 */
 /*!*****************************************************!*\
   !*** ./app_react/components/layout/application.jsx ***!
   \*****************************************************/
@@ -22594,12 +22521,12 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 2);
-	var Reflux = __webpack_require__(/*! reflux */ 196);
+	var Reflux = __webpack_require__(/*! reflux */ 193);
 	
 	var RouteHandler = __webpack_require__(/*! react-router */ 150).RouteHandler;
-	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 218);
+	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 215);
 	
-	var Menu = __webpack_require__(/*! ./menu.jsx */ 223);
+	var Menu = __webpack_require__(/*! ./menu.jsx */ 220);
 	
 	function getStateFromStores() {
 	  return {
@@ -22634,87 +22561,13 @@
 	
 	  render: function () {
 	    return (
-	
 	      React.createElement("div", {id: "app", className: "full-height"}, 
-	
 	        React.createElement("div", {className: "wrapper full-height"}, 
 	          React.createElement(Menu, {isLoggedIn: this.state.isLoggedIn, email: this.state.email}), 
 	
 	          React.createElement("main", {id: "content", className: "full-height inner"}, 
-	            React.createElement("div", {className: "content full-width"}, 
-	              React.createElement("label", null, "Sort by"), 
-	              React.createElement("select", null, 
-	                React.createElement("option", null, "upvotes"), 
-	                React.createElement("option", null, "newest"), 
-	                React.createElement("option", null, "comments")
-	              ), 
-	
-	              React.createElement("hr", null), 
-	              React.createElement("div", {className: "posts"}, 
-	                React.createElement("div", {className: "post cf"}, 
-	                  React.createElement("div", {className: "post-link"}, 
-	                    React.createElement("a", {className: "post-title", href: "#"}, "RefluxJs News"), 
-	                    React.createElement("span", {className: "hostname"}, 
-	                      React.createElement("span", null, "("), 
-	                      React.createElement("a", {href: "#"}, "github.com"), 
-	                      React.createElement("span", null, ")")
-	                    )
-	                  ), 
-	                  React.createElement("div", {className: "post-info"}, 
-	                    React.createElement("div", {className: "posted-by"}, 
-	                      React.createElement("a", {className: "upvote"}, 
-	                        React.createElement("span", null, "616"), 
-	                        React.createElement("span", null, " "), 
-	                        React.createElement("i", {className: "fa fa-arrow-up"}
-	                        )
-	                      ), 
-	                      React.createElement("span", {className: "post-info-item"}, 
-	                        React.createElement("a", {href: "#"}, "Trytest")
-	                      ), 
-	                      React.createElement("span", {className: "post-info-item"}, "2 months ago"), 
-	                      React.createElement("span", {className: "post-info-item"}, 
-	                        React.createElement("a", {href: "#"}, "5 comments")
-	                      )
-	                    )
-	                  )
-	                ), 
-	                React.createElement("div", {className: "post cf"}, 
-	                  React.createElement("div", {className: "post-link"}, 
-	                    React.createElement("a", {className: "post-title"}, "I Smell Like Beef"), 
-	                    React.createElement("span", {className: "hostname"}, 
-	                      React.createElement("span", null, "("), 
-	                      React.createElement("a", {href: "#"}, "www.youtube.com"), 
-	                      React.createElement("span", null, ")")
-	                    )
-	                  ), 
-	                  React.createElement("div", {className: "post-info"}, 
-	                    React.createElement("div", {className: "posted-by"}, 
-	                      React.createElement("a", {className: "upvote"}, 
-	                        React.createElement("span", null, "90"), 
-	                        React.createElement("span", null, " "), 
-	                        React.createElement("i", {className: "fa fa-arrow-up"}
-	                        )
-	                      ), 
-	                      React.createElement("span", {className: "post-info-item"}, 
-	                        React.createElement("a", {href: "#"}, "echenley")
-	                      ), 
-	                      React.createElement("span", {className: "post-info-item"}, "6 months ago"), 
-	                      React.createElement("span", {className: "post-info-item"}, 
-	                        React.createElement("a", {href: "#"}, "20 comments")
-	                      )
-	                    )
-	                  )
-	                )
-	              ), 
-	              React.createElement("hr", null), 
-	
-	              React.createElement("nav", {className: "pagination"}, 
-	                React.createElement("a", {className: "next-page", href: "#"}, "Load More Posts")
-	              )
-	            )
-	          ), 
-	
-	          React.createElement(RouteHandler, {readFromAPI: this.readFromAPI})
+	            React.createElement(RouteHandler, {readFromAPI: this.readFromAPI})
+	          )
 	        )
 	      )
 	    );
@@ -22723,46 +22576,46 @@
 
 
 /***/ },
-/* 196 */
+/* 193 */
 /*!***************************!*\
   !*** ./~/reflux/index.js ***!
   \***************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(/*! ./src */ 197);
+	module.exports = __webpack_require__(/*! ./src */ 194);
 
 
 /***/ },
-/* 197 */
+/* 194 */
 /*!*******************************!*\
   !*** ./~/reflux/src/index.js ***!
   \*******************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.ActionMethods = __webpack_require__(/*! ./ActionMethods */ 199);
+	exports.ActionMethods = __webpack_require__(/*! ./ActionMethods */ 196);
 	
-	exports.ListenerMethods = __webpack_require__(/*! ./ListenerMethods */ 200);
+	exports.ListenerMethods = __webpack_require__(/*! ./ListenerMethods */ 197);
 	
-	exports.PublisherMethods = __webpack_require__(/*! ./PublisherMethods */ 211);
+	exports.PublisherMethods = __webpack_require__(/*! ./PublisherMethods */ 208);
 	
-	exports.StoreMethods = __webpack_require__(/*! ./StoreMethods */ 212);
+	exports.StoreMethods = __webpack_require__(/*! ./StoreMethods */ 209);
 	
-	exports.createAction = __webpack_require__(/*! ./createAction */ 213);
+	exports.createAction = __webpack_require__(/*! ./createAction */ 210);
 	
-	exports.createStore = __webpack_require__(/*! ./createStore */ 207);
+	exports.createStore = __webpack_require__(/*! ./createStore */ 204);
 	
-	exports.connect = __webpack_require__(/*! ./connect */ 214);
+	exports.connect = __webpack_require__(/*! ./connect */ 211);
 	
-	exports.connectFilter = __webpack_require__(/*! ./connectFilter */ 215);
+	exports.connectFilter = __webpack_require__(/*! ./connectFilter */ 212);
 	
-	exports.ListenerMixin = __webpack_require__(/*! ./ListenerMixin */ 216);
+	exports.ListenerMixin = __webpack_require__(/*! ./ListenerMixin */ 213);
 	
-	exports.listenTo = __webpack_require__(/*! ./listenTo */ 198);
+	exports.listenTo = __webpack_require__(/*! ./listenTo */ 195);
 	
-	exports.listenToMany = __webpack_require__(/*! ./listenToMany */ 217);
+	exports.listenToMany = __webpack_require__(/*! ./listenToMany */ 214);
 	
 	
-	var maker = __webpack_require__(/*! ./joins */ 206).staticJoinCreator;
+	var maker = __webpack_require__(/*! ./joins */ 203).staticJoinCreator;
 	
 	exports.joinTrailing = exports.all = maker("last"); // Reflux.all alias for backward compatibility
 	
@@ -22772,7 +22625,7 @@
 	
 	exports.joinConcat = maker("all");
 	
-	var _ = __webpack_require__(/*! ./utils */ 201);
+	var _ = __webpack_require__(/*! ./utils */ 198);
 	
 	exports.EventEmitter = _.EventEmitter;
 	
@@ -22801,7 +22654,7 @@
 	 * Sets the eventmitter that Reflux uses
 	 */
 	exports.setEventEmitter = function(ctx) {
-	    var _ = __webpack_require__(/*! ./utils */ 201);
+	    var _ = __webpack_require__(/*! ./utils */ 198);
 	    exports.EventEmitter = _.EventEmitter = ctx;
 	};
 	
@@ -22810,7 +22663,7 @@
 	 * Sets the Promise library that Reflux uses
 	 */
 	exports.setPromise = function(ctx) {
-	    var _ = __webpack_require__(/*! ./utils */ 201);
+	    var _ = __webpack_require__(/*! ./utils */ 198);
 	    exports.Promise = _.Promise = ctx;
 	};
 	
@@ -22820,7 +22673,7 @@
 	 * @param {Function} factory has the signature `function(resolver) { return [new Promise]; }`
 	 */
 	exports.setPromiseFactory = function(factory) {
-	    var _ = __webpack_require__(/*! ./utils */ 201);
+	    var _ = __webpack_require__(/*! ./utils */ 198);
 	    _.createPromise = factory;
 	};
 	
@@ -22829,14 +22682,14 @@
 	 * Sets the method used for deferring actions and stores
 	 */
 	exports.nextTick = function(nextTick) {
-	    var _ = __webpack_require__(/*! ./utils */ 201);
+	    var _ = __webpack_require__(/*! ./utils */ 198);
 	    _.nextTick = nextTick;
 	};
 	
 	/**
 	 * Provides the set of created actions and stores for introspection
 	 */
-	exports.__keep = __webpack_require__(/*! ./Keep */ 208);
+	exports.__keep = __webpack_require__(/*! ./Keep */ 205);
 	
 	/**
 	 * Warn if Function.prototype.bind not available
@@ -22851,13 +22704,13 @@
 
 
 /***/ },
-/* 198 */
+/* 195 */
 /*!**********************************!*\
   !*** ./~/reflux/src/listenTo.js ***!
   \**********************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Reflux = __webpack_require__(/*! ./index */ 197);
+	var Reflux = __webpack_require__(/*! ./index */ 194);
 	
 	
 	/**
@@ -22896,7 +22749,7 @@
 
 
 /***/ },
-/* 199 */
+/* 196 */
 /*!***************************************!*\
   !*** ./~/reflux/src/ActionMethods.js ***!
   \***************************************/
@@ -22911,14 +22764,14 @@
 
 
 /***/ },
-/* 200 */
+/* 197 */
 /*!*****************************************!*\
   !*** ./~/reflux/src/ListenerMethods.js ***!
   \*****************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(/*! ./utils */ 201),
-	    maker = __webpack_require__(/*! ./joins */ 206).instanceJoinCreator;
+	var _ = __webpack_require__(/*! ./utils */ 198),
+	    maker = __webpack_require__(/*! ./joins */ 203).instanceJoinCreator;
 	
 	/**
 	 * Extract child listenables from a parent from their
@@ -23140,7 +22993,7 @@
 
 
 /***/ },
-/* 201 */
+/* 198 */
 /*!*******************************!*\
   !*** ./~/reflux/src/utils.js ***!
   \*******************************/
@@ -23178,7 +23031,7 @@
 	    return typeof value === 'function';
 	};
 	
-	exports.EventEmitter = __webpack_require__(/*! eventemitter3 */ 202);
+	exports.EventEmitter = __webpack_require__(/*! eventemitter3 */ 199);
 	
 	exports.nextTick = function(callback) {
 	    setTimeout(callback, 0);
@@ -23200,7 +23053,7 @@
 	    return o;
 	};
 	
-	exports.Promise = __webpack_require__(/*! native-promise-only */ 203);
+	exports.Promise = __webpack_require__(/*! native-promise-only */ 200);
 	
 	exports.createPromise = function(resolver) {
 	    return new exports.Promise(resolver);
@@ -23218,7 +23071,7 @@
 
 
 /***/ },
-/* 202 */
+/* 199 */
 /*!*******************************************!*\
   !*** ./~/reflux/~/eventemitter3/index.js ***!
   \*******************************************/
@@ -23456,7 +23309,7 @@
 
 
 /***/ },
-/* 203 */
+/* 200 */
 /*!***********************************************!*\
   !*** ./~/reflux/~/native-promise-only/npo.js ***!
   \***********************************************/
@@ -23466,12 +23319,12 @@
 	    v0.7.6-a (c) Kyle Simpson
 	    MIT License: http://getify.mit-license.org
 	*/
-	!function(t,n,e){n[t]=n[t]||e(),"undefined"!=typeof module&&module.exports?module.exports=n[t]:"function"=="function"&&__webpack_require__(/*! !webpack amd options */ 205)&&!(__WEBPACK_AMD_DEFINE_RESULT__ = function(){return n[t]}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))}("Promise","undefined"!=typeof global?global:this,function(){"use strict";function t(t,n){l.add(t,n),h||(h=y(l.drain))}function n(t){var n,e=typeof t;return null==t||"object"!=e&&"function"!=e||(n=t.then),"function"==typeof n?n:!1}function e(){for(var t=0;t<this.chain.length;t++)o(this,1===this.state?this.chain[t].success:this.chain[t].failure,this.chain[t]);this.chain.length=0}function o(t,e,o){var r,i;try{e===!1?o.reject(t.msg):(r=e===!0?t.msg:e.call(void 0,t.msg),r===o.promise?o.reject(TypeError("Promise-chain cycle")):(i=n(r))?i.call(r,o.resolve,o.reject):o.resolve(r))}catch(c){o.reject(c)}}function r(o){var c,u,a=this;if(!a.triggered){a.triggered=!0,a.def&&(a=a.def);try{(c=n(o))?(u=new f(a),c.call(o,function(){r.apply(u,arguments)},function(){i.apply(u,arguments)})):(a.msg=o,a.state=1,a.chain.length>0&&t(e,a))}catch(s){i.call(u||new f(a),s)}}}function i(n){var o=this;o.triggered||(o.triggered=!0,o.def&&(o=o.def),o.msg=n,o.state=2,o.chain.length>0&&t(e,o))}function c(t,n,e,o){for(var r=0;r<n.length;r++)!function(r){t.resolve(n[r]).then(function(t){e(r,t)},o)}(r)}function f(t){this.def=t,this.triggered=!1}function u(t){this.promise=t,this.state=0,this.triggered=!1,this.chain=[],this.msg=void 0}function a(n){if("function"!=typeof n)throw TypeError("Not a function");if(0!==this.__NPO__)throw TypeError("Not a promise");this.__NPO__=1;var o=new u(this);this.then=function(n,r){var i={success:"function"==typeof n?n:!0,failure:"function"==typeof r?r:!1};return i.promise=new this.constructor(function(t,n){if("function"!=typeof t||"function"!=typeof n)throw TypeError("Not a function");i.resolve=t,i.reject=n}),o.chain.push(i),0!==o.state&&t(e,o),i.promise},this["catch"]=function(t){return this.then(void 0,t)};try{n.call(void 0,function(t){r.call(o,t)},function(t){i.call(o,t)})}catch(c){i.call(o,c)}}var s,h,l,p=Object.prototype.toString,y="undefined"!=typeof setImmediate?function(t){return setImmediate(t)}:setTimeout;try{Object.defineProperty({},"x",{}),s=function(t,n,e,o){return Object.defineProperty(t,n,{value:e,writable:!0,configurable:o!==!1})}}catch(d){s=function(t,n,e){return t[n]=e,t}}l=function(){function t(t,n){this.fn=t,this.self=n,this.next=void 0}var n,e,o;return{add:function(r,i){o=new t(r,i),e?e.next=o:n=o,e=o,o=void 0},drain:function(){var t=n;for(n=e=h=void 0;t;)t.fn.call(t.self),t=t.next}}}();var g=s({},"constructor",a,!1);return s(a,"prototype",g,!1),s(g,"__NPO__",0,!1),s(a,"resolve",function(t){var n=this;return t&&"object"==typeof t&&1===t.__NPO__?t:new n(function(n,e){if("function"!=typeof n||"function"!=typeof e)throw TypeError("Not a function");n(t)})}),s(a,"reject",function(t){return new this(function(n,e){if("function"!=typeof n||"function"!=typeof e)throw TypeError("Not a function");e(t)})}),s(a,"all",function(t){var n=this;return"[object Array]"!=p.call(t)?n.reject(TypeError("Not an array")):0===t.length?n.resolve([]):new n(function(e,o){if("function"!=typeof e||"function"!=typeof o)throw TypeError("Not a function");var r=t.length,i=Array(r),f=0;c(n,t,function(t,n){i[t]=n,++f===r&&e(i)},o)})}),s(a,"race",function(t){var n=this;return"[object Array]"!=p.call(t)?n.reject(TypeError("Not an array")):new n(function(e,o){if("function"!=typeof e||"function"!=typeof o)throw TypeError("Not a function");c(n,t,function(t,n){e(n)},o)})}),a});
+	!function(t,n,e){n[t]=n[t]||e(),"undefined"!=typeof module&&module.exports?module.exports=n[t]:"function"=="function"&&__webpack_require__(/*! !webpack amd options */ 202)&&!(__WEBPACK_AMD_DEFINE_RESULT__ = function(){return n[t]}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))}("Promise","undefined"!=typeof global?global:this,function(){"use strict";function t(t,n){l.add(t,n),h||(h=y(l.drain))}function n(t){var n,e=typeof t;return null==t||"object"!=e&&"function"!=e||(n=t.then),"function"==typeof n?n:!1}function e(){for(var t=0;t<this.chain.length;t++)o(this,1===this.state?this.chain[t].success:this.chain[t].failure,this.chain[t]);this.chain.length=0}function o(t,e,o){var r,i;try{e===!1?o.reject(t.msg):(r=e===!0?t.msg:e.call(void 0,t.msg),r===o.promise?o.reject(TypeError("Promise-chain cycle")):(i=n(r))?i.call(r,o.resolve,o.reject):o.resolve(r))}catch(c){o.reject(c)}}function r(o){var c,u,a=this;if(!a.triggered){a.triggered=!0,a.def&&(a=a.def);try{(c=n(o))?(u=new f(a),c.call(o,function(){r.apply(u,arguments)},function(){i.apply(u,arguments)})):(a.msg=o,a.state=1,a.chain.length>0&&t(e,a))}catch(s){i.call(u||new f(a),s)}}}function i(n){var o=this;o.triggered||(o.triggered=!0,o.def&&(o=o.def),o.msg=n,o.state=2,o.chain.length>0&&t(e,o))}function c(t,n,e,o){for(var r=0;r<n.length;r++)!function(r){t.resolve(n[r]).then(function(t){e(r,t)},o)}(r)}function f(t){this.def=t,this.triggered=!1}function u(t){this.promise=t,this.state=0,this.triggered=!1,this.chain=[],this.msg=void 0}function a(n){if("function"!=typeof n)throw TypeError("Not a function");if(0!==this.__NPO__)throw TypeError("Not a promise");this.__NPO__=1;var o=new u(this);this.then=function(n,r){var i={success:"function"==typeof n?n:!0,failure:"function"==typeof r?r:!1};return i.promise=new this.constructor(function(t,n){if("function"!=typeof t||"function"!=typeof n)throw TypeError("Not a function");i.resolve=t,i.reject=n}),o.chain.push(i),0!==o.state&&t(e,o),i.promise},this["catch"]=function(t){return this.then(void 0,t)};try{n.call(void 0,function(t){r.call(o,t)},function(t){i.call(o,t)})}catch(c){i.call(o,c)}}var s,h,l,p=Object.prototype.toString,y="undefined"!=typeof setImmediate?function(t){return setImmediate(t)}:setTimeout;try{Object.defineProperty({},"x",{}),s=function(t,n,e,o){return Object.defineProperty(t,n,{value:e,writable:!0,configurable:o!==!1})}}catch(d){s=function(t,n,e){return t[n]=e,t}}l=function(){function t(t,n){this.fn=t,this.self=n,this.next=void 0}var n,e,o;return{add:function(r,i){o=new t(r,i),e?e.next=o:n=o,e=o,o=void 0},drain:function(){var t=n;for(n=e=h=void 0;t;)t.fn.call(t.self),t=t.next}}}();var g=s({},"constructor",a,!1);return s(a,"prototype",g,!1),s(g,"__NPO__",0,!1),s(a,"resolve",function(t){var n=this;return t&&"object"==typeof t&&1===t.__NPO__?t:new n(function(n,e){if("function"!=typeof n||"function"!=typeof e)throw TypeError("Not a function");n(t)})}),s(a,"reject",function(t){return new this(function(n,e){if("function"!=typeof n||"function"!=typeof e)throw TypeError("Not a function");e(t)})}),s(a,"all",function(t){var n=this;return"[object Array]"!=p.call(t)?n.reject(TypeError("Not an array")):0===t.length?n.resolve([]):new n(function(e,o){if("function"!=typeof e||"function"!=typeof o)throw TypeError("Not a function");var r=t.length,i=Array(r),f=0;c(n,t,function(t,n){i[t]=n,++f===r&&e(i)},o)})}),s(a,"race",function(t){var n=this;return"[object Array]"!=p.call(t)?n.reject(TypeError("Not an array")):new n(function(e,o){if("function"!=typeof e||"function"!=typeof o)throw TypeError("Not a function");c(n,t,function(t,n){e(n)},o)})}),a});
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./~/node-libs-browser/~/timers-browserify/main.js */ 204).setImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./~/node-libs-browser/~/timers-browserify/main.js */ 201).setImmediate))
 
 /***/ },
-/* 204 */
+/* 201 */
 /*!*********************************************************!*\
   !*** ./~/node-libs-browser/~/timers-browserify/main.js ***!
   \*********************************************************/
@@ -23553,10 +23406,10 @@
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/timers-browserify/main.js */ 204).setImmediate, __webpack_require__(/*! ./~/node-libs-browser/~/timers-browserify/main.js */ 204).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/node-libs-browser/~/timers-browserify/main.js */ 201).setImmediate, __webpack_require__(/*! ./~/node-libs-browser/~/timers-browserify/main.js */ 201).clearImmediate))
 
 /***/ },
-/* 205 */
+/* 202 */
 /*!****************************************!*\
   !*** (webpack)/buildin/amd-options.js ***!
   \****************************************/
@@ -23567,7 +23420,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 206 */
+/* 203 */
 /*!*******************************!*\
   !*** ./~/reflux/src/joins.js ***!
   \*******************************/
@@ -23578,8 +23431,8 @@
 	 */
 	
 	var slice = Array.prototype.slice,
-	    _ = __webpack_require__(/*! ./utils */ 201),
-	    createStore = __webpack_require__(/*! ./createStore */ 207),
+	    _ = __webpack_require__(/*! ./utils */ 198),
+	    createStore = __webpack_require__(/*! ./createStore */ 204),
 	    strategyMethodNames = {
 	        strict: "joinStrict",
 	        first: "joinLeading",
@@ -23682,18 +23535,18 @@
 
 
 /***/ },
-/* 207 */
+/* 204 */
 /*!*************************************!*\
   !*** ./~/reflux/src/createStore.js ***!
   \*************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(/*! ./utils */ 201),
-	    Reflux = __webpack_require__(/*! ./index */ 197),
-	    Keep = __webpack_require__(/*! ./Keep */ 208),
-	    mixer = __webpack_require__(/*! ./mixer */ 209),
+	var _ = __webpack_require__(/*! ./utils */ 198),
+	    Reflux = __webpack_require__(/*! ./index */ 194),
+	    Keep = __webpack_require__(/*! ./Keep */ 205),
+	    mixer = __webpack_require__(/*! ./mixer */ 206),
 	    allowed = {preEmit:1,shouldEmit:1},
-	    bindMethods = __webpack_require__(/*! ./bindMethods */ 210);
+	    bindMethods = __webpack_require__(/*! ./bindMethods */ 207);
 	
 	/**
 	 * Creates an event emitting Data Store. It is mixed in with functions
@@ -23752,7 +23605,7 @@
 
 
 /***/ },
-/* 208 */
+/* 205 */
 /*!******************************!*\
   !*** ./~/reflux/src/Keep.js ***!
   \******************************/
@@ -23773,13 +23626,13 @@
 
 
 /***/ },
-/* 209 */
+/* 206 */
 /*!*******************************!*\
   !*** ./~/reflux/src/mixer.js ***!
   \*******************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(/*! ./utils */ 201);
+	var _ = __webpack_require__(/*! ./utils */ 198);
 	
 	module.exports = function mix(def) {
 	    var composed = {
@@ -23839,7 +23692,7 @@
 
 
 /***/ },
-/* 210 */
+/* 207 */
 /*!*************************************!*\
   !*** ./~/reflux/src/bindMethods.js ***!
   \*************************************/
@@ -23871,13 +23724,13 @@
 
 
 /***/ },
-/* 211 */
+/* 208 */
 /*!******************************************!*\
   !*** ./~/reflux/src/PublisherMethods.js ***!
   \******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(/*! ./utils */ 201);
+	var _ = __webpack_require__(/*! ./utils */ 198);
 	
 	/**
 	 * A module of methods for object that you want to be able to listen to.
@@ -24061,7 +23914,7 @@
 
 
 /***/ },
-/* 212 */
+/* 209 */
 /*!**************************************!*\
   !*** ./~/reflux/src/StoreMethods.js ***!
   \**************************************/
@@ -24076,15 +23929,15 @@
 
 
 /***/ },
-/* 213 */
+/* 210 */
 /*!**************************************!*\
   !*** ./~/reflux/src/createAction.js ***!
   \**************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(/*! ./utils */ 201),
-	    Reflux = __webpack_require__(/*! ./index */ 197),
-	    Keep = __webpack_require__(/*! ./Keep */ 208),
+	var _ = __webpack_require__(/*! ./utils */ 198),
+	    Reflux = __webpack_require__(/*! ./index */ 194),
+	    Keep = __webpack_require__(/*! ./Keep */ 205),
 	    allowed = {preEmit:1,shouldEmit:1};
 	
 	/**
@@ -24150,14 +24003,14 @@
 
 
 /***/ },
-/* 214 */
+/* 211 */
 /*!*********************************!*\
   !*** ./~/reflux/src/connect.js ***!
   \*********************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Reflux = __webpack_require__(/*! ./index */ 197),
-	    _ = __webpack_require__(/*! ./utils */ 201);
+	var Reflux = __webpack_require__(/*! ./index */ 194),
+	    _ = __webpack_require__(/*! ./utils */ 198);
 	
 	module.exports = function(listenable,key){
 	    return {
@@ -24181,14 +24034,14 @@
 
 
 /***/ },
-/* 215 */
+/* 212 */
 /*!***************************************!*\
   !*** ./~/reflux/src/connectFilter.js ***!
   \***************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Reflux = __webpack_require__(/*! ./index */ 197),
-	  _ = __webpack_require__(/*! ./utils */ 201);
+	var Reflux = __webpack_require__(/*! ./index */ 194),
+	  _ = __webpack_require__(/*! ./utils */ 198);
 	
 	module.exports = function(listenable, key, filterFunc) {
 	    filterFunc = _.isFunction(key) ? key : filterFunc;
@@ -24229,14 +24082,14 @@
 
 
 /***/ },
-/* 216 */
+/* 213 */
 /*!***************************************!*\
   !*** ./~/reflux/src/ListenerMixin.js ***!
   \***************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(/*! ./utils */ 201),
-	    ListenerMethods = __webpack_require__(/*! ./ListenerMethods */ 200);
+	var _ = __webpack_require__(/*! ./utils */ 198),
+	    ListenerMethods = __webpack_require__(/*! ./ListenerMethods */ 197);
 	
 	/**
 	 * A module meant to be consumed as a mixin by a React component. Supplies the methods from
@@ -24255,13 +24108,13 @@
 
 
 /***/ },
-/* 217 */
+/* 214 */
 /*!**************************************!*\
   !*** ./~/reflux/src/listenToMany.js ***!
   \**************************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	var Reflux = __webpack_require__(/*! ./index */ 197);
+	var Reflux = __webpack_require__(/*! ./index */ 194);
 	
 	/**
 	 * A mixin factory for a React component. Meant as a more convenient way of using the `listenerMixin`,
@@ -24297,7 +24150,7 @@
 
 
 /***/ },
-/* 218 */
+/* 215 */
 /*!****************************************!*\
   !*** ./app_react/stores/LoginStore.js ***!
   \****************************************/
@@ -24305,10 +24158,10 @@
 
 	'use strict';
 	
-	var Reflux = __webpack_require__(/*! reflux */ 196);
-	var request = __webpack_require__(/*! superagent */ 219);
+	var Reflux = __webpack_require__(/*! reflux */ 193);
+	var request = __webpack_require__(/*! superagent */ 216);
 	
-	var actions = __webpack_require__(/*! ../actions/actions */ 222);
+	var actions = __webpack_require__(/*! ../actions/actions */ 219);
 	
 	
 	var _accessToken = sessionStorage.getItem('accessToken');
@@ -24374,7 +24227,7 @@
 
 
 /***/ },
-/* 219 */
+/* 216 */
 /*!************************************!*\
   !*** ./~/superagent/lib/client.js ***!
   \************************************/
@@ -24384,8 +24237,8 @@
 	 * Module dependencies.
 	 */
 	
-	var Emitter = __webpack_require__(/*! emitter */ 220);
-	var reduce = __webpack_require__(/*! reduce */ 221);
+	var Emitter = __webpack_require__(/*! emitter */ 217);
+	var reduce = __webpack_require__(/*! reduce */ 218);
 	
 	/**
 	 * Root reference for iframes.
@@ -25464,7 +25317,7 @@
 
 
 /***/ },
-/* 220 */
+/* 217 */
 /*!***************************************************!*\
   !*** ./~/superagent/~/component-emitter/index.js ***!
   \***************************************************/
@@ -25637,7 +25490,7 @@
 
 
 /***/ },
-/* 221 */
+/* 218 */
 /*!**************************************************!*\
   !*** ./~/superagent/~/reduce-component/index.js ***!
   \**************************************************/
@@ -25669,7 +25522,7 @@
 	};
 
 /***/ },
-/* 222 */
+/* 219 */
 /*!**************************************!*\
   !*** ./app_react/actions/actions.js ***!
   \**************************************/
@@ -25677,7 +25530,7 @@
 
 	'use strict';
 	
-	var Reflux = __webpack_require__(/*! reflux */ 196);
+	var Reflux = __webpack_require__(/*! reflux */ 193);
 	
 	module.exports = Reflux.createActions([
 	    // user actions
@@ -25688,7 +25541,7 @@
 
 
 /***/ },
-/* 223 */
+/* 220 */
 /*!**********************************************!*\
   !*** ./app_react/components/layout/menu.jsx ***!
   \**********************************************/
@@ -25699,7 +25552,7 @@
 	var React = __webpack_require__(/*! react */ 2);
 	var Router = __webpack_require__(/*! react-router */ 150);
 	
-	var actions = __webpack_require__(/*! ../../actions/actions */ 222);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 219);
 	
 	var Link = Router.Link;
 	
@@ -25733,15 +25586,15 @@
 	          React.createElement(Link, {to: "login", className: "register-link"}, "Sign In")
 	        ), 
 	        React.createElement("span", null, 
-	          React.createElement("a", {className: "register-link"}, "Register")
+	          React.createElement(Link, {to: "signup", className: "register-link"}, "Sign Up")
 	        )
 	      )
 	    );
 	
-	
+	    // panel-open
 	    return (
 	
-	      React.createElement("header", {className: "header"}, 
+	      React.createElement("header", {className: "header panel-open"}, 
 	        React.createElement("div", {className: "header-main"}, 
 	          React.createElement("div", {className: "float-left"}, 
 	            React.createElement("a", {className: "menu-title active", href: "#"}, "react-news"), 
@@ -25760,6 +25613,157 @@
 	        )
 	      )
 	
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 221 */
+/*!*********************************************!*\
+  !*** ./app_react/components/posts/view.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 2);
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 222);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  getInitialState: function() {
+	    return { data: [] };
+	  },
+	  render: function() {
+	    return (
+	      React.createElement("div", {className: "content full-width"}, 
+	        React.createElement("label", null, "Sort by"), 
+	        React.createElement("select", null, 
+	          React.createElement("option", null, "upvotes"), 
+	          React.createElement("option", null, "newest"), 
+	          React.createElement("option", null, "comments")
+	        ), 
+	
+	        React.createElement("hr", null), 
+	        React.createElement("div", {className: "posts"}, 
+	          React.createElement("div", {className: "post cf"}, 
+	            React.createElement("div", {className: "post-link"}, 
+	              React.createElement("a", {className: "post-title", href: "#"}, "RefluxJs News"), 
+	              React.createElement("span", {className: "hostname"}, 
+	                React.createElement("span", null, "("), 
+	                React.createElement("a", {href: "#"}, "github.com"), 
+	                React.createElement("span", null, ")")
+	              )
+	            ), 
+	            React.createElement("div", {className: "post-info"}, 
+	              React.createElement("div", {className: "posted-by"}, 
+	                React.createElement("a", {className: "upvote"}, 
+	                  React.createElement("span", null, "616"), 
+	                  React.createElement("span", null, " "), 
+	                  React.createElement("i", {className: "fa fa-arrow-up"}
+	                  )
+	                ), 
+	                React.createElement("span", {className: "post-info-item"}, 
+	                  React.createElement("a", {href: "#"}, "Trytest")
+	                ), 
+	                React.createElement("span", {className: "post-info-item"}, "2 months ago"), 
+	                React.createElement("span", {className: "post-info-item"}, 
+	                  React.createElement("a", {href: "#"}, "5 comments")
+	                )
+	              )
+	            )
+	          ), 
+	          React.createElement("div", {className: "post cf"}, 
+	            React.createElement("div", {className: "post-link"}, 
+	              React.createElement("a", {className: "post-title"}, "I Smell Like Beef"), 
+	              React.createElement("span", {className: "hostname"}, 
+	                React.createElement("span", null, "("), 
+	                React.createElement("a", {href: "#"}, "www.youtube.com"), 
+	                React.createElement("span", null, ")")
+	              )
+	            ), 
+	            React.createElement("div", {className: "post-info"}, 
+	              React.createElement("div", {className: "posted-by"}, 
+	                React.createElement("a", {className: "upvote"}, 
+	                  React.createElement("span", null, "90"), 
+	                  React.createElement("span", null, " "), 
+	                  React.createElement("i", {className: "fa fa-arrow-up"}
+	                  )
+	                ), 
+	                React.createElement("span", {className: "post-info-item"}, 
+	                  React.createElement("a", {href: "#"}, "echenley")
+	                ), 
+	                React.createElement("span", {className: "post-info-item"}, "6 months ago"), 
+	                React.createElement("span", {className: "post-info-item"}, 
+	                  React.createElement("a", {href: "#"}, "20 comments")
+	                )
+	              )
+	            )
+	          )
+	        ), 
+	        React.createElement("hr", null), 
+	
+	        React.createElement("nav", {className: "pagination"}, 
+	          React.createElement("a", {className: "next-page", href: "#"}, "Load More Posts")
+	        )
+	      )
+	    );
+	  }
+	});
+	
+	// render: function() {
+	//   return (
+	//     <div className='posts-view'>
+	//       <PostsList data={this.state.data} />
+	//     </div>
+	//   );
+	// }
+
+
+/***/ },
+/* 222 */
+/*!*********************************************!*\
+  !*** ./app_react/components/posts/list.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 2);
+	var Post = __webpack_require__(/*! ./post.jsx */ 223);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    var posts = this.props.data.map(function(post) {
+	      return (
+	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
+	      );
+	    });
+	
+	    return (
+	      React.createElement("ul", {className: "posts-list"}, 
+	        posts
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 223 */
+/*!*********************************************!*\
+  !*** ./app_react/components/posts/post.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 2);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    return (
+	      React.createElement("li", {className: "post"}, 
+	        React.createElement("span", {className: "post-text"}, this.props.title), ",", 
+	        React.createElement("span", {className: "post-text"}, this.props.body), ",", 
+	        React.createElement("span", {className: "post-text"}, this.props.url)
+	      )
 	    );
 	  }
 	});
@@ -25798,8 +25802,8 @@
 	var React = __webpack_require__(/*! react */ 2);
 	var Navigation = __webpack_require__(/*! react-router */ 150).Navigation;
 	
-	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 218);
-	var actions = __webpack_require__(/*! ../../actions/actions */ 222);
+	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 215);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 219);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  mixins: [Navigation],
@@ -25820,21 +25824,19 @@
 	
 	  render: function() {
 	    return (
-	      React.createElement("div", {className: "md-overlay md-show"}, 
-	        React.createElement("div", {className: "login text-center md-modal", id: "overlay-content"}, 
-	          React.createElement("form", {className: "login-form text-left", onSubmit: this._onSubmit}, 
-	            React.createElement("h1", null, "Login"), 
+	      React.createElement("div", {className: "login md-modal"}, 
+	        React.createElement("form", {className: "login-form", onSubmit: this._onSubmit}, 
+	          React.createElement("h1", {className: "text-center"}, "Login"), 
 	
-	            "Email", 
-	            React.createElement("br", null), 
-	            React.createElement("input", {type: "email", placeholder: "Email", defaultValue: "user@example.com", ref: "email"}), 
+	          "Email", 
+	          React.createElement("br", null), 
+	          React.createElement("input", {type: "email", placeholder: "Email", defaultValue: "user@example.com", ref: "email"}), 
 	
-	            "Password", 
-	            React.createElement("br", null), 
-	            React.createElement("input", {type: "password", placeholder: "Password", ref: "password"}), 
+	          "Password", 
+	          React.createElement("br", null), 
+	          React.createElement("input", {type: "password", placeholder: "Password", ref: "password"}), 
 	
-	            React.createElement("button", {type: "submit", className: "button button-primary"}, "Sign In")
-	          )
+	          React.createElement("button", {type: "submit", className: "button button-primary"}, "Sign In")
 	        )
 	      )
 	    );
@@ -25844,6 +25846,44 @@
 
 /***/ },
 /* 226 */
+/*!***********************************************************!*\
+  !*** ./app_react/components/registrations/SignUpPage.jsx ***!
+  \***********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 2);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    return (
+	      React.createElement("div", {className: "login md-modal"}, 
+	        React.createElement("form", {className: "login-form"}, 
+	          React.createElement("h1", {className: "text-center"}, "Register"), 
+	
+	          "Username", 
+	          React.createElement("br", null), 
+	          React.createElement("input", {type: "text", placeholder: "Username", ref: "username"}), 
+	
+	          "Email", 
+	          React.createElement("br", null), 
+	          React.createElement("input", {type: "email", placeholder: "Email", defaultValue: "user@example.com", ref: "email"}), 
+	
+	          "Password", 
+	          React.createElement("br", null), 
+	          React.createElement("input", {type: "password", placeholder: "Password", ref: "password"}), 
+	
+	          React.createElement("button", {type: "submit", className: "button button-primary"}, "Register")
+	        )
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 227 */
 /*!**********************************!*\
   !*** ./~/object-assign/index.js ***!
   \**********************************/

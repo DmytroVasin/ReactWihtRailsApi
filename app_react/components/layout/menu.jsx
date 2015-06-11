@@ -37,15 +37,15 @@ module.exports = React.createClass({
           <Link to='login' className='register-link'>Sign In</Link>
         </span>
         <span>
-          <a className='register-link'>Register</a>
+          <Link to='signup' className='register-link'>Sign Up</Link>
         </span>
       </div>
     );
 
-
+    // panel-open
     return (
 
-      <header className='header'>
+      <header className='header panel-open'>
         <div className='header-main'>
           <div className='float-left'>
             <a className='menu-title active' href='#'>react-news</a>
