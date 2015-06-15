@@ -21,3 +21,5 @@
 
 en:
   hello: "Hello world"
+  sessions_controller:
+    invalid_login_attempt: 'Invalid Datas'

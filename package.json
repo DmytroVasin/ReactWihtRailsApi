@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "devbuild": "webpack -w -d --config webpack.config.js --profile --progress --colors"
+    "build": "webpack -w -d --config webpack.config.js --profile --progress --colors"
   },
   "dependencies": {
     "react": "^0.12.2",

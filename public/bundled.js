@@ -19368,7 +19368,7 @@
 	
 	var Router = __webpack_require__(/*! react-router */ 150);
 	var routes = __webpack_require__(/*! ../routes.jsx */ 191);
-	var assign = __webpack_require__(/*! object-assign */ 227);
+	var assign = __webpack_require__(/*! object-assign */ 229);
 	
 	
 	var router = Router.create(routes, Router.HistoryLocation)
@@ -22498,7 +22498,7 @@
 	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 221);
 	var AboutView = __webpack_require__(/*! ./components/static/about_view.jsx */ 224);
 	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 225);
-	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 226);
+	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 227);
 	
 	
 	module.exports = (
@@ -22545,10 +22545,6 @@
 	    return getStateFromStores();
 	  },
 	
-	  _onChange: function() {
-	    this.setState( getStateFromStores() );
-	  },
-	
 	  componentDidMount: function() {
 	    // ---- Какой из этих методов следует юзать?
 	
@@ -22559,6 +22555,10 @@
 	    this.listenTo(LoginStore, this._onChange);
 	  },
 	
+	  _onChange: function() {
+	    this.setState( getStateFromStores() );
+	  },
+	
 	  render: function () {
 	    return (
 	      React.createElement("div", {id: "app", className: "full-height"}, 
@@ -22566,7 +22566,7 @@
 	          React.createElement(Menu, {isLoggedIn: this.state.isLoggedIn, email: this.state.email}), 
 	
 	          React.createElement("main", {id: "content", className: "full-height inner"}, 
-	            React.createElement(RouteHandler, {readFromAPI: this.readFromAPI})
+	            React.createElement(RouteHandler, null)
 	          )
 	        )
 	      )
@@ -24166,11 +24166,13 @@
 	
 	var _accessToken = sessionStorage.getItem('accessToken');
 	var _email = sessionStorage.getItem('email');
+	var _loginFlashMessage = ''; // Сама конструкция убогая - что за локальные переменные епта!
 	
 	module.exports = Reflux.createStore({
 	  init: function() {
 	    this.listenTo(actions.login, this.onLogin);
 	    this.listenTo(actions.successLoggin, this.onSuccessLoggin);
+	    this.listenTo(actions.unSuccessLoggin, this.onUnSuccessLoggin);
 	    this.listenTo(actions.logout, this.onLogout);
 	  },
 	
@@ -24182,24 +24184,33 @@
 	    return _email;
 	  },
 	
-	  onLogin: function(email, password) {
+	  getLogginFlash: function(){
+	    return _loginFlashMessage;
+	  },
+	
+	  onLogin: function(email, password, cb) {
 	    request.post('/v1/login')
 	      .send({ user: { email: email, password: password }})
 	      .set('Accept', 'application/json')
 	      .end(function(error, res){
-	        // убрать нах IF-ы
-	        if (res) {
-	          if (res.error) {
-	            // error...
-	          } else {
-	            var json = JSON.parse(res.text);
-	            actions.successLoggin(json); // здесь тригериться еще одно событие - что бы можно было сделать this.trigger - это правильно?'
-	          }
-	        }
+	        // cb(res) - так правильно дергать коллбек?
+	
+	        if (res && res.error){
+	          actions.unSuccessLoggin(res.text);
+	          cb(false);
+	          return;
+	        };
+	
+	        if (res && !res.error){ // можно ли тут юзнуть res.ok?
+	          actions.successLoggin(res.text); // здесь тригериться еще одно событие - что бы можно было сделать this.trigger - это правильно?'
+	          cb(true);
+	          return;
+	        };
 	      });
 	  },
 	
-	  onSuccessLoggin: function(json){
+	  onSuccessLoggin: function(json_string_with_user){
+	    var json = JSON.parse(json_string_with_user);
 	    // Если слушает componentDidMount - и мне надо сделать редирект - нужно ли тригерить ?
 	    // может ли STORE слушать другой STORE
 	
@@ -24208,8 +24219,16 @@
 	
 	    sessionStorage.setItem('accessToken', _accessToken);
 	    sessionStorage.setItem('email', _email);
+	    _loginFlashMessage = '';
+	
 	    // если я тут хочу вернуь json и какой-то статус а ниже....
 	    this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно - какие параметры принимает и как на них реагирует ?
+	  },
+	
+	  onUnSuccessLoggin: function(json_string_with_error){
+	    _loginFlashMessage = JSON.parse(json_string_with_error).error;
+	    // Как блин тут очистить форму?
+	    this.trigger();
 	  },
 	
 	  onLogout: function(){
@@ -25536,7 +25555,11 @@
 	    // user actions
 	    'login',
 	    'successLoggin',
-	    'logout'
+	    'unSuccessLoggin',
+	    'logout',
+	    'signUp',
+	    'successSignUp',
+	    'unSuccessSignUp'
 	]);
 
 
@@ -25591,9 +25614,7 @@
 	      )
 	    );
 	
-	    // panel-open
 	    return (
-	
 	      React.createElement("header", {className: "header panel-open"}, 
 	        React.createElement("div", {className: "header-main"}, 
 	          React.createElement("div", {className: "float-left"}, 
@@ -25603,19 +25624,20 @@
 	          ), 
 	
 	           RightNavigation 
-	        ), 
-	        React.createElement("div", {id: "header-panel", className: "header-panel text-center"}, 
-	          React.createElement("form", {className: "panel-form"}, 
-	            React.createElement("input", {type: "text", className: "panel-input", placeholder: "Title"}), 
-	            React.createElement("input", {type: "url", className: "panel-input", placeholder: "Link"}), 
-	            React.createElement("button", {type: "submit", className: "button panel-button button-outline"}, "Submit")
-	          )
 	        )
 	      )
-	
 	    );
 	  }
 	});
+	
+	// HEADER
+	// <div id='header-panel' className='header-panel text-center'>
+	//   <form className='panel-form'>
+	//     <input type='text' className='panel-input' placeholder='Title' />
+	//     <input type='url' className='panel-input' placeholder='Link' />
+	//     <button type='submit' className='button panel-button button-outline'>Submit</button>
+	//   </form>
+	// </div>
 
 
 /***/ },
@@ -25800,13 +25822,30 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 2);
+	var Reflux = __webpack_require__(/*! reflux */ 193);
+	
 	var Navigation = __webpack_require__(/*! react-router */ 150).Navigation;
 	
+	// как правильно рекваирить ? ну типо с начала компоненты потом акшены потом сторы или как ? есть ли какой-то порядок ?
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 215);
+	
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 230);
+	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 219);
 	
+	function getStateFromStores() {
+	  return {
+	    login_error_message: LoginStore.getLogginFlash(),
+	    processing: false
+	  };
+	}
+	
 	module.exports = React.createClass({displayName: "exports",
-	  mixins: [Navigation],
+	  mixins: [Reflux.ListenerMixin, Navigation],
+	
+	  getInitialState: function() {
+	    return getStateFromStores();
+	  },
 	
 	  _onSubmit: function(e){
 	    e.preventDefault();
@@ -25814,15 +25853,58 @@
 	    var email = this.refs.email.getDOMNode().value.trim();
 	    var password = this.refs.password.getDOMNode().value.trim();
 	
-	    actions.login(email, password);
+	    this.setState({ processing: true });
+	
+	    actions.login(email, password, function(loggedIn){
+	      // находиться ли оно в парвильном месте ?*????
+	      if (loggedIn){
+	        this.replaceWith('/about');
+	      }
+	
+	      if (!loggedIn){
+	        getStateFromStores(); // - НАХУЙ НАДО? ОН ВООБЩЕ НЕ ОТРАБАТЫВАЕТ ЕПТ!
+	        // this.replaceWith('/login'); // нам не нужет этот replace так как мы уже находимя на этой странце
+	
+	
+	        // ВОПРОС: Если бы мне тут понадобилось выставить не дефолтный стейт processing: false- а какой-то другой -
+	        // мне что нужно два раза просписывать setState...
+	      }
+	    }.bind(this));
+	
 	    // че за хуйня - почему тут?редиректа не будет если провалиться...
 	    // правильно держать во вьюхе вроде как = но не правильно делать редирект при ошибке валидации
 	    // логично это было бы делать в "LoginStore.listen" но блин там эта хрень реалирует на любое действие с locationStore...
 	    // не легче делать windows.location() ?
-	    this.transitionTo('/');
+	    // this.transitionTo('/');
+	  },
+	
+	
+	  componentDidMount: function() {
+	    // debugger;
+	    // ---- Какой из этих методов следует юзать?
+	
+	    // var that = this; // remove that!
+	    // LoginStore.listen(function() {
+	    //   that._onChange();
+	    // })
+	
+	    this.listenTo(LoginStore, this._onChange);
+	  },
+	
+	  // И че - всегда так писать ? пздц какой-то
+	  _onChange: function(){
+	    // Этот метод дергается когда кто-то логиниться - какого хера - он не должен дергаться!!
+	    // тупо как-то.
+	    this.setState( getStateFromStores() );
 	  },
 	
 	  render: function() {
+	    var FlashMessage = this.state.login_error_message ? (
+	      React.createElement("div", {className: "error login-error"},  this.state.login_error_message)
+	    ) : (
+	      React.createElement("div", null)
+	    );
+	
 	    return (
 	      React.createElement("div", {className: "login md-modal"}, 
 	        React.createElement("form", {className: "login-form", onSubmit: this._onSubmit}, 
@@ -25836,8 +25918,10 @@
 	          React.createElement("br", null), 
 	          React.createElement("input", {type: "password", placeholder: "Password", ref: "password"}), 
 	
-	          React.createElement("button", {type: "submit", className: "button button-primary"}, "Sign In")
-	        )
+	          React.createElement(SignButton, {processing: this.state.processing, button_text: "Sign In"})
+	        ), 
+	
+	         FlashMessage 
 	      )
 	    );
 	  }
@@ -25845,7 +25929,8 @@
 
 
 /***/ },
-/* 226 */
+/* 226 */,
+/* 227 */
 /*!***********************************************************!*\
   !*** ./app_react/components/registrations/SignUpPage.jsx ***!
   \***********************************************************/
@@ -25854,28 +25939,87 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 2);
+	var Reflux = __webpack_require__(/*! reflux */ 193);
+	
+	var Navigation = __webpack_require__(/*! react-router */ 150).Navigation;
+	
+	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 228);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 219);
+	
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 230);
+	
+	function getStateFromStores() {
+	  return {
+	    signup_error_message: RegistrationStore.getSignupFlash(), // они должны быть разными ( login/signup ) ! - так как при переходе через формы будет сохраняться флеш месседж с другой формы
+	    processing: false
+	  };
+	}
 	
 	module.exports = React.createClass({displayName: "exports",
+	  mixins: [Reflux.ListenerMixin, Navigation],
+	
+	  getInitialState: function() {
+	    return getStateFromStores();
+	  },
+	
+	  _onSubmit: function(e){
+	    e.preventDefault();
+	
+	    var username = this.refs.username.getDOMNode().value.trim();
+	    var email = this.refs.email.getDOMNode().value.trim();
+	    var password = this.refs.password.getDOMNode().value.trim();
+	
+	    this.setState({ processing: true });
+	
+	    actions.signUp(username, email, password, function(loggedIn){
+	      if (loggedIn){
+	        this.replaceWith('/about');
+	      }
+	
+	      if (!loggedIn){
+	        debugger;
+	        getStateFromStores();
+	      }
+	    }.bind(this));
+	  },
+	
+	  componentDidMount: function() {
+	    this.listenTo(RegistrationStore, this._onChange);
+	  },
+	
+	  _onChange: function(){
+	    this.setState( getStateFromStores() );
+	  },
+	
 	  render: function() {
+	    // дублирование кода!
+	    var FlashMessage = this.state.signup_error_message ? (
+	      React.createElement("div", {className: "error login-error"},  this.state.signup_error_message)
+	    ) : (
+	      React.createElement("div", null)
+	    );
+	
 	    return (
 	      React.createElement("div", {className: "login md-modal"}, 
-	        React.createElement("form", {className: "login-form"}, 
+	        React.createElement("form", {className: "login-form", onSubmit: this._onSubmit}, 
 	          React.createElement("h1", {className: "text-center"}, "Register"), 
 	
 	          "Username", 
 	          React.createElement("br", null), 
-	          React.createElement("input", {type: "text", placeholder: "Username", ref: "username"}), 
+	          React.createElement("input", {type: "text", placeholder: "Username", defaultValue: "Dima", ref: "username"}), 
 	
 	          "Email", 
 	          React.createElement("br", null), 
-	          React.createElement("input", {type: "email", placeholder: "Email", defaultValue: "user@example.com", ref: "email"}), 
+	          React.createElement("input", {type: "email", placeholder: "Email", defaultValue: "user1@example.com", ref: "email"}), 
 	
 	          "Password", 
 	          React.createElement("br", null), 
 	          React.createElement("input", {type: "password", placeholder: "Password", ref: "password"}), 
 	
-	          React.createElement("button", {type: "submit", className: "button button-primary"}, "Register")
-	        )
+	          React.createElement(SignButton, {processing: this.state.processing, button_text: "Register"})
+	        ), 
+	
+	         FlashMessage 
 	      )
 	    );
 	  }
@@ -25883,7 +26027,72 @@
 
 
 /***/ },
-/* 227 */
+/* 228 */
+/*!***********************************************!*\
+  !*** ./app_react/stores/RegistrationStore.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Reflux = __webpack_require__(/*! reflux */ 193);
+	var request = __webpack_require__(/*! superagent */ 216);
+	
+	var actions = __webpack_require__(/*! ../actions/actions */ 219);
+	
+	
+	var _signupFlashMessage = '';
+	
+	module.exports = Reflux.createStore({
+	  init: function() {
+	    this.listenTo(actions.signUp, this.onSignUp);
+	    this.listenTo(actions.unSuccessSignUp, this.onUnSuccessSignUp);
+	    this.listenTo(actions.successSignUp, this.onSuccessSignUp);
+	  },
+	
+	  getSignupFlash: function(){
+	    return _signupFlashMessage;
+	  },
+	
+	  onSuccessSignUp: function(json_string_with_user){
+	    _signupFlashMessage = ''; // мб это как-то сделать в successLoggin?
+	    actions.successLoggin(json_string_with_user);
+	    this.trigger();
+	  },
+	
+	  onUnSuccessSignUp: function(json_string_with_error){
+	    debugger;
+	
+	    _signupFlashMessage = JSON.parse(json_string_with_error).error;
+	    this.trigger();
+	  },
+	
+	  onSignUp: function(username, email, password, cb) {
+	    request.post('/v1/signup')
+	      .send({ user: { user_name: username, email: email, password: password }})
+	      .set('Accept', 'application/json')
+	      .end(function(error, res){  // КАК тут юзнуть success? или другой коллбек? -  и нужно ли вообще?
+	
+	        if (res && res.error){
+	          // МБ всю эту херь луче вынести в cb ( что этот метод делал только signup и никого не логинил )
+	          debugger; // ПОЧЕМУ "cb"-callback дергаеться раньше чем - "unSuccessSignUp" ?????????????????? ( Смотреть в Debugger-e )  || это типо второй экшен
+	          actions.unSuccessSignUp(res.text);
+	          cb(false);
+	          return;
+	        };
+	
+	        if (res && !res.error){
+	          actions.successSignUp(res.text);
+	          cb(true);
+	          return;
+	        };
+	      });
+	  },
+	});
+
+
+/***/ },
+/* 229 */
 /*!**********************************!*\
   !*** ./~/object-assign/index.js ***!
   \**********************************/
@@ -25926,6 +26135,48 @@
 	
 		return to;
 	};
+
+
+/***/ },
+/* 230 */
+/*!****************************************************!*\
+  !*** ./app_react/components/shared/SignButton.jsx ***!
+  \****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	// - Нужно ли везде использовать 'use strict' или стоит один раз заюзать и будет норм.
+	// - МОЖЕТ НАХУЙ НАМ ВООБЩЕ РОУТЕР ?
+	// - Как компилить less в webpack?
+	
+	var React = __webpack_require__(/*! react */ 2);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    // на сколько нужно дробить компоненты? пока дробяться - дробить или по своим очучениям?
+	    // Как правильно дробить sign-in/sign up box with button and spinner? button отдельная компонента - и спиннер отдельная ? или это как сделал я сейчас?
+	    // все в одной компоненте?
+	
+	    var SignInButton = this.props.processing ? (
+	      React.createElement("button", {type: "submit", className: "button button-primary text-center"}, 
+	        React.createElement("div", {className: "spinner"}, 
+	          React.createElement("div", {className: "rect1"}), 
+	          React.createElement("div", {className: "rect2"}), 
+	          React.createElement("div", {className: "rect3"}), 
+	          React.createElement("div", {className: "rect4"}), 
+	          React.createElement("div", {className: "rect5"})
+	        )
+	      )
+	    ) : (
+	      React.createElement("button", {type: "submit", className: "button button-primary text-center"},  this.props.button_text)
+	    )
+	
+	    return (
+	      React.createElement("div", null,  SignInButton )
+	    );
+	  }
+	});
 
 
 /***/ }

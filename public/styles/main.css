@@ -571,6 +571,8 @@ textarea:focus {
   background: #c4c8c9;
 }
 .button-primary {
+  height: 40px;
+  width: 207px;
   background: #449dd1;
   border-bottom: 2px solid #2d83b5;
 }
@@ -585,37 +587,55 @@ textarea:focus {
 .button-outline:active {
   border-bottom-width: 2px;
 }
-.react-spinner {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  top: 50%;
-  left: 50%;
-  transform: translateY(1rem);
+.spinner {
+  height: 23px;
+  text-align: center;
+  font-size: 10px;
 }
-.button .react-spinner {
-  width: 27px;
-  height: 27px;
+.spinner > div {
+  background-color: #fff;
+  height: 100%;
+  width: 6px;
+  display: inline-block;
+  -webkit-animation: stretchdelay 1.2s infinite ease-in-out;
+  animation: stretchdelay 1.2s infinite ease-in-out;
 }
-.react-spinner_bar {
-  animation: react-spinner_spin 1.2s linear infinite;
-  border-radius: 5px;
-  position: absolute;
-  width: 20%;
-  height: 7.8%;
-  top: -3.9%;
-  left: -10%;
-  background: #040203;
+.spinner .rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
 }
-.button .react-spinner_bar {
-  background: #fff;
+.spinner .rect3 {
+  -webkit-animation-delay: -1s;
+  animation-delay: -1s;
 }
-@keyframes react-spinner_spin {
-  0% {
-    opacity: 1;
-  }
+.spinner .rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+.spinner .rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+@-webkit-keyframes stretchdelay {
+  0%,
+  40%,
   100% {
-    opacity: 0.15;
+    -webkit-transform: scaleY(0.4);
+  }
+  20% {
+    -webkit-transform: scaleY(1);
+  }
+}
+@keyframes stretchdelay {
+  0%,
+  40%,
+  100% {
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1);
+    -webkit-transform: scaleY(1);
   }
 }
 .fade-in {

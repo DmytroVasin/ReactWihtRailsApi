@@ -42,9 +42,7 @@ module.exports = React.createClass({
       </div>
     );
 
-    // panel-open
     return (
-
       <header className='header panel-open'>
         <div className='header-main'>
           <div className='float-left'>
@@ -55,15 +53,16 @@ module.exports = React.createClass({
 
           { RightNavigation }
         </div>
-        <div id='header-panel' className='header-panel text-center'>
-          <form className='panel-form'>
-            <input type='text' className='panel-input' placeholder='Title' />
-            <input type='url' className='panel-input' placeholder='Link' />
-            <button type='submit' className='button panel-button button-outline'>Submit</button>
-          </form>
-        </div>
       </header>
-
     );
   }
 });
+
+// HEADER
+// <div id='header-panel' className='header-panel text-center'>
+//   <form className='panel-form'>
+//     <input type='text' className='panel-input' placeholder='Title' />
+//     <input type='url' className='panel-input' placeholder='Link' />
+//     <button type='submit' className='button panel-button button-outline'>Submit</button>
+//   </form>
+// </div>

@@ -6,5 +6,9 @@ module.exports = Reflux.createActions([
     // user actions
     'login',
     'successLoggin',
-    'logout'
+    'unSuccessLoggin',
+    'logout',
+    'signUp',
+    'successSignUp',
+    'unSuccessSignUp'
 ]);

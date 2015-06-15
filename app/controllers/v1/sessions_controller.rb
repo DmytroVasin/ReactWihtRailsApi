@@ -4,6 +4,8 @@ module V1
 
     # POST /v1/login
     def create
+      sleep 1 # Emulate big query.
+
       @user = User.find_for_database_authentication(email: params[:user][:email])
 
       return invalid_login_attempt unless @user
@@ -20,7 +22,7 @@ module V1
 
     def invalid_login_attempt
       warden.custom_failure!
-      render json: {error: t('sessions_controller.invalid_login_attempt')}, status: :unprocessable_entity
+      render json: { error: t('sessions_controller.invalid_login_attempt') }, status: :unprocessable_entity
     end
 
   end

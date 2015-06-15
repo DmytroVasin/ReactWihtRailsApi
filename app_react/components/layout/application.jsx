@@ -25,10 +25,6 @@ module.exports = React.createClass({
     return getStateFromStores();
   },
 
-  _onChange: function() {
-    this.setState( getStateFromStores() );
-  },
-
   componentDidMount: function() {
     // ---- Какой из этих методов следует юзать?
 
@@ -39,6 +35,10 @@ module.exports = React.createClass({
     this.listenTo(LoginStore, this._onChange);
   },
 
+  _onChange: function() {
+    this.setState( getStateFromStores() );
+  },
+
   render: function () {
     return (
       <div id='app' className='full-height'>
@@ -46,7 +46,7 @@ module.exports = React.createClass({
           <Menu isLoggedIn={this.state.isLoggedIn} email={this.state.email} />
 
           <main id='content' className='full-height inner'>
-            <RouteHandler readFromAPI={this.readFromAPI} />
+            <RouteHandler />
           </main>
         </div>
       </div>
