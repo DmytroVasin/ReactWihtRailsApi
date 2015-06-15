@@ -1,3 +1,5 @@
+require('./css/main.scss');
+
 var React = require('react');
 var router = require('./stores/RouteStore').getRouter();
 

@@ -1,3 +1,7 @@
+// npm install --save-dev extract-text-webpack-plugin
+
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
+
 module.exports = {
   entry: ['./app_react/app.jsx'],
   output: {
@@ -6,7 +10,11 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /\.jsx$/, loader: 'jsx-loader' }
+      { test: /\.jsx$/, loader: 'jsx-loader' },
+      { test: /\.scss$/, loader: ExtractTextPlugin.extract('css!sass') }
     ]
-  }
+  },
+  plugins: [
+    new ExtractTextPlugin('app.css', { allChunks: true })
+  ]
 };
