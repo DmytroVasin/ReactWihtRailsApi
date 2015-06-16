@@ -14,7 +14,7 @@ module.exports = React.createClass({
     // Как правильно дробить sign-in/sign up box with button and spinner? button отдельная компонента - и спиннер отдельная ? или это как сделал я сейчас?
     // все в одной компоненте?
 
-    var SignInButton = this.props.processing ? (
+    var SignButton = this.props.processing ? (
       <button type='submit' className='button button-primary text-center'>
         <div className='spinner'>
           <div className='rect1'></div>
@@ -29,7 +29,7 @@ module.exports = React.createClass({
     )
 
     return (
-      <div>{ SignInButton }</div>
+      <div>{ SignButton }</div>
     );
   }
 });

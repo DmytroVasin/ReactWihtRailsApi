@@ -25962,7 +25962,7 @@
 	    // Как правильно дробить sign-in/sign up box with button and spinner? button отдельная компонента - и спиннер отдельная ? или это как сделал я сейчас?
 	    // все в одной компоненте?
 	
-	    var SignInButton = this.props.processing ? (
+	    var SignButton = this.props.processing ? (
 	      React.createElement("button", {type: "submit", className: "button button-primary text-center"}, 
 	        React.createElement("div", {className: "spinner"}, 
 	          React.createElement("div", {className: "rect1"}), 
@@ -25977,7 +25977,7 @@
 	    )
 	
 	    return (
-	      React.createElement("div", null,  SignInButton )
+	      React.createElement("div", null,  SignButton )
 	    );
 	  }
 	});

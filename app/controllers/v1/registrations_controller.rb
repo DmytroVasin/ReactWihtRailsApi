@@ -21,6 +21,7 @@ module V1
         sign_in :user, @user # это делаеться для получения Authorized?
         render json: @user, serializer: SessionSerializer, root: nil
       else
+        binding.pry
         render json: { error: @user.errors.full_messages.join(', ') }, status: :unprocessable_entity
       end
     end
