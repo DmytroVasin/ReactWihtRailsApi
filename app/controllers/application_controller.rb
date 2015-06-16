@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::API
   include AbstractController::Translation # WTF ? - походу эта пердота добавляет t('') метод - трансляции
-  # before_action :authenticate_user_from_token! # WTF ?
+  before_action :authenticate_user_from_token!
 
   respond_to :json
 

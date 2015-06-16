@@ -13,5 +13,6 @@ module.exports = Reflux.createActions([
     'unSuccessSignUp',
 
     // static pages
-    'getAbout'
+    'getAbout',
+    'getPosts'
 ]);

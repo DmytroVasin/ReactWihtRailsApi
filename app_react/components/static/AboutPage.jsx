@@ -1,14 +1,14 @@
 'use strict';
 
 var React = require('react');
-var Reflux = require('reflux');
+// var Reflux = require('reflux');
 
 var actions = require('../../actions/actions');
-var StaticInformationStore = require('../../stores/StaticInformationStore');
+// var StaticInformationStore = require('../../stores/StaticInformationStore');
 
 
 module.exports = React.createClass({
-  mixins: [Reflux.ListenerMixin],
+  // mixins: [Reflux.ListenerMixin],
 
   getInitialState: function() {
     return {

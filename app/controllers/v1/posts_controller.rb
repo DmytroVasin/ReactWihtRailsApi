@@ -1,8 +1,15 @@
-class PostsController < ApplicationController
-  def index
-    posts = Post.all
+module V1
+  class PostsController < ApplicationController
+    skip_before_action :authenticate_user_from_token!
 
-    # render json: PostSerializer.new(posts).as_json
-    render json: posts, each_serializer: PostSerializer
+    def index
+      posts = Post.all
+
+      sleep 1
+
+      # binding.pry
+
+      render json: posts, each_serializer: PostSerializer
+    end
   end
 end

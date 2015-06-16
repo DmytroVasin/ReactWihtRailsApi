@@ -19379,7 +19379,7 @@
 	
 	var Router = __webpack_require__(/*! react-router */ 151);
 	var routes = __webpack_require__(/*! ../routes.jsx */ 192);
-	var assign = __webpack_require__(/*! object-assign */ 231);
+	var assign = __webpack_require__(/*! object-assign */ 230);
 	
 	
 	var router = Router.create(routes, Router.HistoryLocation)
@@ -22508,8 +22508,8 @@
 	var App = __webpack_require__(/*! ./components/layout/application.jsx */ 193);
 	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 222);
 	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 225);
-	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 227);
-	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 229);
+	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 226);
+	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 228);
 	
 	
 	module.exports = (
@@ -25573,7 +25573,8 @@
 	    'unSuccessSignUp',
 	
 	    // static pages
-	    'getAbout'
+	    'getAbout',
+	    'getPosts'
 	]);
 
 
@@ -25664,13 +25665,45 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 3);
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 223);
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 231);
+	var Post = __webpack_require__(/*! ./post.jsx */ 223);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
+	
+	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 224);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  getInitialState: function() {
-	    return { data: [] };
+	    return { data: [], loading: true };
 	  },
+	
+	  componentDidMount: function() {
+	    this.readPostsFromAPI();
+	  },
+	
+	  readPostsFromAPI: function() {
+	    var that = this;
+	    // use binding!
+	    actions.getPosts(function(posts){
+	      that.setState({
+	        data: posts,
+	        loading: false
+	      });
+	    });
+	  },
+	
 	  render: function() {
+	    var postsBlock = this.state.loading ? (
+	      React.createElement("div", {className: "posts"}, 
+	        React.createElement("div", {className: "posts-preloader-wrapper"}, 
+	          React.createElement("div", {className: "preloader"})
+	        )
+	      )
+	    ) : (
+	      React.createElement("div", {className: "posts"}, 
+	        React.createElement(PostsList, {data:  this.state.data})
+	      )
+	    );
+	
 	    return (
 	      React.createElement("div", {className: "content full-width"}, 
 	        React.createElement("label", null, "Sort by"), 
@@ -25681,62 +25714,7 @@
 	        ), 
 	
 	        React.createElement("hr", null), 
-	        React.createElement("div", {className: "posts"}, 
-	          React.createElement("div", {className: "post cf"}, 
-	            React.createElement("div", {className: "post-link"}, 
-	              React.createElement("a", {className: "post-title", href: "#"}, "RefluxJs News"), 
-	              React.createElement("span", {className: "hostname"}, 
-	                React.createElement("span", null, "("), 
-	                React.createElement("a", {href: "#"}, "github.com"), 
-	                React.createElement("span", null, ")")
-	              )
-	            ), 
-	            React.createElement("div", {className: "post-info"}, 
-	              React.createElement("div", {className: "posted-by"}, 
-	                React.createElement("a", {className: "upvote"}, 
-	                  React.createElement("span", null, "616"), 
-	                  React.createElement("span", null, " "), 
-	                  React.createElement("i", {className: "fa fa-arrow-up"}
-	                  )
-	                ), 
-	                React.createElement("span", {className: "post-info-item"}, 
-	                  React.createElement("a", {href: "#"}, "Trytest")
-	                ), 
-	                React.createElement("span", {className: "post-info-item"}, "2 months ago"), 
-	                React.createElement("span", {className: "post-info-item"}, 
-	                  React.createElement("a", {href: "#"}, "5 comments")
-	                )
-	              )
-	            )
-	          ), 
-	          React.createElement("div", {className: "post cf"}, 
-	            React.createElement("div", {className: "post-link"}, 
-	              React.createElement("a", {className: "post-title"}, "I Smell Like Beef"), 
-	              React.createElement("span", {className: "hostname"}, 
-	                React.createElement("span", null, "("), 
-	                React.createElement("a", {href: "#"}, "www.youtube.com"), 
-	                React.createElement("span", null, ")")
-	              )
-	            ), 
-	            React.createElement("div", {className: "post-info"}, 
-	              React.createElement("div", {className: "posted-by"}, 
-	                React.createElement("a", {className: "upvote"}, 
-	                  React.createElement("span", null, "90"), 
-	                  React.createElement("span", null, " "), 
-	                  React.createElement("i", {className: "fa fa-arrow-up"}
-	                  )
-	                ), 
-	                React.createElement("span", {className: "post-info-item"}, 
-	                  React.createElement("a", {href: "#"}, "echenley")
-	                ), 
-	                React.createElement("span", {className: "post-info-item"}, "6 months ago"), 
-	                React.createElement("span", {className: "post-info-item"}, 
-	                  React.createElement("a", {href: "#"}, "20 comments")
-	                )
-	              )
-	            )
-	          )
-	        ), 
+	         postsBlock, 
 	        React.createElement("hr", null), 
 	
 	        React.createElement("nav", {className: "pagination"}, 
@@ -25746,45 +25724,10 @@
 	    );
 	  }
 	});
-	
-	// render: function() {
-	//   return (
-	//     <div className='posts-view'>
-	//       <PostsList data={this.state.data} />
-	//     </div>
-	//   );
-	// }
 
 
 /***/ },
 /* 223 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/list.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 3);
-	var Post = __webpack_require__(/*! ./post.jsx */ 224);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    var posts = this.props.data.map(function(post) {
-	      return (
-	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
-	      );
-	    });
-	
-	    return (
-	      React.createElement("ul", {className: "posts-list"}, 
-	        posts
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 224 */
 /*!*********************************************!*\
   !*** ./app_react/components/posts/post.jsx ***!
   \*********************************************/
@@ -25795,12 +25738,67 @@
 	module.exports = React.createClass({displayName: "exports",
 	  render: function() {
 	    return (
-	      React.createElement("li", {className: "post"}, 
-	        React.createElement("span", {className: "post-text"}, this.props.title), ",", 
-	        React.createElement("span", {className: "post-text"}, this.props.body), ",", 
-	        React.createElement("span", {className: "post-text"}, this.props.url)
+	      React.createElement("div", {className: "post cf"}, 
+	        React.createElement("div", {className: "post-link"}, 
+	          React.createElement("a", {className: "post-title"},  this.props.title), 
+	          React.createElement("span", {className: "hostname"}, 
+	            React.createElement("span", null, "("), 
+	            React.createElement("a", {href: "#"},  this.props.url), 
+	            React.createElement("span", null, ")")
+	          )
+	        ), 
+	        React.createElement("div", {className: "post-info"}, 
+	          React.createElement("div", {className: "posted-by"}, 
+	            React.createElement("a", {className: "upvote"}, 
+	              React.createElement("span", null, "90"), 
+	              React.createElement("span", null, " "), 
+	              React.createElement("i", {className: "fa fa-arrow-up"}
+	              )
+	            ), 
+	            React.createElement("span", {className: "post-info-item"}, 
+	              React.createElement("a", {href: "#"}, "echenley")
+	            ), 
+	            React.createElement("span", {className: "post-info-item"}, "6 months ago"), 
+	            React.createElement("span", {className: "post-info-item"}, 
+	              React.createElement("a", {href: "#"}, "20 comments")
+	            )
+	          )
+	        )
 	      )
 	    );
+	  }
+	});
+
+
+/***/ },
+/* 224 */
+/*!***************************************!*\
+  !*** ./app_react/stores/PostStore.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	// ДОХУЯ у нас сторов!
+	
+	var Reflux = __webpack_require__(/*! reflux */ 194);
+	var request = __webpack_require__(/*! superagent */ 217);
+	
+	var actions = __webpack_require__(/*! ../actions/actions */ 220);
+	
+	module.exports = Reflux.createStore({
+	  init: function() {
+	    this.listenTo(actions.getPosts, this.onGetPosts);
+	  },
+	
+	  onGetPosts: function(cb) {
+	    request.get('/v1/posts')
+	      .set('Accept', 'application/json')
+	      .end(function(error, res){
+	        if (res && !res.error){
+	          cb( JSON.parse(res.text) );
+	        };
+	      });
 	  }
 	});
 
@@ -25815,14 +25813,14 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 3);
-	var Reflux = __webpack_require__(/*! reflux */ 194);
+	// var Reflux = require('reflux');
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
-	var StaticInformationStore = __webpack_require__(/*! ../../stores/StaticInformationStore */ 226);
+	// var StaticInformationStore = require('../../stores/StaticInformationStore');
 	
 	
 	module.exports = React.createClass({displayName: "exports",
-	  mixins: [Reflux.ListenerMixin],
+	  // mixins: [Reflux.ListenerMixin],
 	
 	  getInitialState: function() {
 	    return {
@@ -25884,39 +25882,6 @@
 /***/ },
 /* 226 */
 /*!****************************************************!*\
-  !*** ./app_react/stores/StaticInformationStore.js ***!
-  \****************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var Reflux = __webpack_require__(/*! reflux */ 194);
-	var request = __webpack_require__(/*! superagent */ 217);
-	
-	var actions = __webpack_require__(/*! ../actions/actions */ 220);
-	
-	module.exports = Reflux.createStore({
-	  init: function() {
-	    this.listenTo(actions.getAbout, this.onGetAbout);
-	  },
-	
-	  onGetAbout: function(cb) {
-	    request.get('/v1/about')
-	      .set('Accept', 'application/json')
-	      .end(function(error, res){
-	        // кули у мнея error всегда пустой?
-	        // нахуй прокидывать колбеки - если можно дернуть триггер ?
-	        if (res && !res.error){ // можно ли тут юзнуть res.ok?
-	          cb( JSON.parse(res.text).about_text );
-	        };
-	      });
-	  }
-	});
-
-
-/***/ },
-/* 227 */
-/*!****************************************************!*\
   !*** ./app_react/components/session/LoginPage.jsx ***!
   \****************************************************/
 /***/ function(module, exports, __webpack_require__) {
@@ -25931,7 +25896,7 @@
 	// как правильно рекваирить ? ну типо с начала компоненты потом акшены потом сторы или как ? есть ли какой-то порядок ?
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 228);
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
 	
@@ -26031,7 +25996,7 @@
 
 
 /***/ },
-/* 228 */
+/* 227 */
 /*!****************************************************!*\
   !*** ./app_react/components/shared/SignButton.jsx ***!
   \****************************************************/
@@ -26075,7 +26040,7 @@
 
 
 /***/ },
-/* 229 */
+/* 228 */
 /*!***********************************************************!*\
   !*** ./app_react/components/registrations/SignUpPage.jsx ***!
   \***********************************************************/
@@ -26088,10 +26053,10 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 151).Navigation;
 	
-	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 230);
+	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 229);
 	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 228);
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
 	
 	function getStateFromStores() {
 	  return {
@@ -26172,7 +26137,7 @@
 
 
 /***/ },
-/* 230 */
+/* 229 */
 /*!***********************************************!*\
   !*** ./app_react/stores/RegistrationStore.js ***!
   \***********************************************/
@@ -26237,7 +26202,7 @@
 
 
 /***/ },
-/* 231 */
+/* 230 */
 /*!**********************************!*\
   !*** ./~/object-assign/index.js ***!
   \**********************************/
@@ -26280,6 +26245,33 @@
 	
 		return to;
 	};
+
+
+/***/ },
+/* 231 */
+/*!*********************************************!*\
+  !*** ./app_react/components/posts/list.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 3);
+	var Post = __webpack_require__(/*! ./post.jsx */ 223);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    var posts = this.props.data.map(function(post) {
+	      return (
+	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
+	      );
+	    });
+	
+	    return (
+	      React.createElement("ul", {className: "posts-list"}, 
+	        posts
+	      )
+	    );
+	  }
+	});
 
 
 /***/ }
