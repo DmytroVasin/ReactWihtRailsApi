@@ -3,8 +3,10 @@ module V1
     before_action :check_if_user_login
     skip_before_action :authenticate_user_from_token!
 
-    # POST /v1/login
+    # POST /v1/signup
     def create
+      sleep 1 # Emulate big query.
+
       @user = User.where(email: params[:user][:email])
       if @user.any?
         render json: { error: 'This email already in use'}, status: 401

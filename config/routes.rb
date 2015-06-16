@@ -4,9 +4,12 @@ Rails.application.routes.draw do
   devise_for :user, only: []
 
   namespace :v1, defaults: { format: :json } do
-    # concat this resources into one namespace
+    # concat this resources into one namespace?
     resource :login, only: [:create], controller: :sessions
     resource :signup, only: [:create], controller: :registrations
+
+
+    resource :about, only: [:show]
   end
 end
 # curl http://127.0.0.1:3000/v1/login --data "user[email]=user@example.com&user[password]=password"

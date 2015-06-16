@@ -19379,7 +19379,7 @@
 	
 	var Router = __webpack_require__(/*! react-router */ 151);
 	var routes = __webpack_require__(/*! ../routes.jsx */ 192);
-	var assign = __webpack_require__(/*! object-assign */ 230);
+	var assign = __webpack_require__(/*! object-assign */ 231);
 	
 	
 	var router = Router.create(routes, Router.HistoryLocation)
@@ -22507,15 +22507,15 @@
 	
 	var App = __webpack_require__(/*! ./components/layout/application.jsx */ 193);
 	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 222);
-	var AboutView = __webpack_require__(/*! ./components/static/about_view.jsx */ 225);
-	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 226);
-	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 228);
+	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 225);
+	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 227);
+	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 229);
 	
 	
 	module.exports = (
 	  React.createElement(Route, {name: "app", path: "/", handler: App}, 
 	    React.createElement(DefaultRoute, {name: "posts", handler: PostsView}), 
-	    React.createElement(Route, {name: "about", handler: AboutView}), 
+	    React.createElement(Route, {name: "about", handler: AboutPage}), 
 	    React.createElement(Route, {name: "login", path: "/login", handler: LoginPage}), 
 	    React.createElement(Route, {name: "signup", path: "/signup", handler: SignUpPage})
 	  )
@@ -25570,7 +25570,10 @@
 	    'logout',
 	    'signUp',
 	    'successSignUp',
-	    'unSuccessSignUp'
+	    'unSuccessSignUp',
+	
+	    // static pages
+	    'getAbout'
 	]);
 
 
@@ -25804,19 +25807,74 @@
 
 /***/ },
 /* 225 */
-/*!****************************************************!*\
-  !*** ./app_react/components/static/about_view.jsx ***!
-  \****************************************************/
+/*!***************************************************!*\
+  !*** ./app_react/components/static/AboutPage.jsx ***!
+  \***************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+	
 	var React = __webpack_require__(/*! react */ 3);
+	var Reflux = __webpack_require__(/*! reflux */ 194);
+	
+	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
+	var StaticInformationStore = __webpack_require__(/*! ../../stores/StaticInformationStore */ 226);
+	
 	
 	module.exports = React.createClass({displayName: "exports",
+	  mixins: [Reflux.ListenerMixin],
+	
+	  getInitialState: function() {
+	    return {
+	      loading: true,
+	      about_text: ''
+	    };
+	  },
+	
+	  // логично ли было бы это держать внутри React.createClass - если да - то как?
+	  // Какие функции надо держаит внутри а какие снаружи?
+	
+	  //------------------------
+	  // перенести к постам!
+	  // Что делать если апишка долго ничего не возвратила или вообще провалилась ? то какое действие логично?
+	  // 1-редирект
+	  // 2-сообщение об ошибке ( какое сообщение на примере страницы about )
+	  // Логичто было бы выдавать 404 типо страницы не существует - типо если недопустимый черт заходит и тут херакс....
+	  //------------------------
+	
+	
+	  componentDidMount: function() {
+	    // debugger;
+	    // this.listenTo(StaticInformationStore, this._onChange);
+	    var that = this;
+	    actions.getAbout(function(about_text){
+	      // debugger;
+	      // Бло криво как-то, через триггеры то лучше.
+	      that.setState({
+	        loading: false,
+	        about_text: about_text
+	      });
+	    }); // ???? правильно ли это ? если я сразу захочу получить инфу с сервера - как мне это сделать ?
+	  },
+	
+	  // _onChange: function(){
+	  //   debugger;
+	  //   // this.setState(  );
+	  // },
+	
+	
 	  render: function() {
+	    // какого хуя не срабатывает?
+	    var Container = this.state.loading ? (
+	      React.createElement("div", {className: "preloader"})
+	    ) : (
+	      React.createElement("p", null,  this.state.about_text)
+	    )
+	
 	    return (
 	      React.createElement("div", {id: "about-view"}, 
 	        React.createElement("h1", null, "About"), 
-	        React.createElement("p", null, "An example of a stateless Ruby API using the rails-api gem, with a React client side app. To fit the definition of stateless, the API does not include action-view, sprockets, or sessions. Roughly speaking, React replaces action-view, Webpack replaces sprockets, and JWT replaces sessions.")
+	         Container 
 	      )
 	    );
 	  }
@@ -25825,6 +25883,39 @@
 
 /***/ },
 /* 226 */
+/*!****************************************************!*\
+  !*** ./app_react/stores/StaticInformationStore.js ***!
+  \****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Reflux = __webpack_require__(/*! reflux */ 194);
+	var request = __webpack_require__(/*! superagent */ 217);
+	
+	var actions = __webpack_require__(/*! ../actions/actions */ 220);
+	
+	module.exports = Reflux.createStore({
+	  init: function() {
+	    this.listenTo(actions.getAbout, this.onGetAbout);
+	  },
+	
+	  onGetAbout: function(cb) {
+	    request.get('/v1/about')
+	      .set('Accept', 'application/json')
+	      .end(function(error, res){
+	        // кули у мнея error всегда пустой?
+	        // нахуй прокидывать колбеки - если можно дернуть триггер ?
+	        if (res && !res.error){ // можно ли тут юзнуть res.ok?
+	          cb( JSON.parse(res.text).about_text );
+	        };
+	      });
+	  }
+	});
+
+
+/***/ },
+/* 227 */
 /*!****************************************************!*\
   !*** ./app_react/components/session/LoginPage.jsx ***!
   \****************************************************/
@@ -25840,7 +25931,7 @@
 	// как правильно рекваирить ? ну типо с начала компоненты потом акшены потом сторы или как ? есть ли какой-то порядок ?
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 228);
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
 	
@@ -25940,7 +26031,7 @@
 
 
 /***/ },
-/* 227 */
+/* 228 */
 /*!****************************************************!*\
   !*** ./app_react/components/shared/SignButton.jsx ***!
   \****************************************************/
@@ -25984,7 +26075,7 @@
 
 
 /***/ },
-/* 228 */
+/* 229 */
 /*!***********************************************************!*\
   !*** ./app_react/components/registrations/SignUpPage.jsx ***!
   \***********************************************************/
@@ -25997,10 +26088,10 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 151).Navigation;
 	
-	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 229);
+	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 230);
 	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 228);
 	
 	function getStateFromStores() {
 	  return {
@@ -26081,7 +26172,7 @@
 
 
 /***/ },
-/* 229 */
+/* 230 */
 /*!***********************************************!*\
   !*** ./app_react/stores/RegistrationStore.js ***!
   \***********************************************/
@@ -26146,7 +26237,7 @@
 
 
 /***/ },
-/* 230 */
+/* 231 */
 /*!**********************************!*\
   !*** ./~/object-assign/index.js ***!
   \**********************************/
