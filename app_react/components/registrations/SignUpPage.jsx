@@ -5,14 +5,16 @@ var Reflux = require('reflux');
 
 var Navigation = require('react-router').Navigation;
 
+var LoginStore = require('../../stores/LoginStore'); // TODO: ПОЧЕМУ НЕ РАБОТАЕТ? - надо вешать два листенера!
 var RegistrationStore = require('../../stores/RegistrationStore');
+
 var actions = require('../../actions/actions');
 
 var SignButton = require('../shared/SignButton.jsx');
 
 function getStateFromStores() {
   return {
-    signup_error_message: RegistrationStore.getSignupFlash(), // они должны быть разными ( login/signup ) ! - так как при переходе через формы будет сохраняться флеш месседж с другой формы
+    signup_error_message: RegistrationStore.getSignupFlash(),
     processing: false
   };
 }
@@ -33,28 +35,30 @@ module.exports = React.createClass({
 
     this.setState({ processing: true });
 
-    actions.signUp(username, email, password, function(loggedIn){
-      if (loggedIn){
-        this.replaceWith('/about');
-      }
-
-      if (!loggedIn){
-        debugger;
-        getStateFromStores();
-      }
-    }.bind(this));
+    actions.signUp(username, email, password);
   },
 
   componentDidMount: function() {
     this.listenTo(RegistrationStore, this._onChange);
+    this.listenTo(LoginStore, this._onChange);
   },
 
   _onChange: function(){
+    // TODO: Дергаеться два раза - хуево
+    // Дергаеться дважды - так как первая реация на unsuceess - и тогда не дергаеться loginStore
+    // Если Succss мы еще и логинимся - и тогда пиздец - дергаеться второй store!
+
+    if ( LoginStore.isLoggedIn() ){
+      this.replaceWith('/about');
+    } else {
+      getStateFromStores();
+    }
+
     this.setState( getStateFromStores() );
   },
 
   render: function() {
-    // дублирование кода!
+    // дублирование кода! ( убрать )
     var FlashMessage = this.state.signup_error_message ? (
       <div className='error login-error'>{ this.state.signup_error_message }</div>
     ) : (

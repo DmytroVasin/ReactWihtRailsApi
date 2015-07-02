@@ -1,7 +1,7 @@
 'use strict';
 
+require('whatwg-fetch');
 var Reflux = require('reflux');
-var request = require('superagent');
 
 var actions = require('../actions/actions');
 
@@ -19,38 +19,43 @@ module.exports = Reflux.createStore({
     return _signupFlashMessage;
   },
 
-  onSuccessSignUp: function(json_string_with_user){
-    _signupFlashMessage = ''; // мб это как-то сделать в successLoggin?
-    actions.successLoggin(json_string_with_user);
+  onSuccessSignUp: function(userData){
+    _signupFlashMessage = '';
+    actions.successLoggin(userData);
+
     this.trigger();
   },
 
-  onUnSuccessSignUp: function(json_string_with_error){
-    debugger;
+  onUnSuccessSignUp: function(errorMessage){
+    _signupFlashMessage = errorMessage;
 
-    _signupFlashMessage = JSON.parse(json_string_with_error).error;
     this.trigger();
   },
 
-  onSignUp: function(username, email, password, cb) {
-    request.post('/v1/signup')
-      .send({ user: { user_name: username, email: email, password: password }})
-      .set('Accept', 'application/json')
-      .end(function(error, res){  // КАК тут юзнуть success? или другой коллбек? -  и нужно ли вообще?
+  onSignUp: function(username, email, password) {
+    fetch('/v1/signup', {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user: {
+          user_name: username,
+          email: email,
+          password: password
+        }
+      })
+    }).then( function(response) {
+      return response.json()
+    }).then(function(data) {
+      debugger;
 
-        if (res && res.error){
-          // МБ всю эту херь луче вынести в cb ( что этот метод делал только signup и никого не логинил )
-          debugger; // ПОЧЕМУ "cb"-callback дергаеться раньше чем - "unSuccessSignUp" ?????????????????? ( Смотреть в Debugger-e )  || это типо второй экшен
-          actions.unSuccessSignUp(res.text);
-          cb(false);
-          return;
-        };
+      if (data.error){
+        return actions.unSuccessSignUp(data.error);
+      }
 
-        if (res && !res.error){
-          actions.successSignUp(res.text);
-          cb(true);
-          return;
-        };
-      });
-  },
+      actions.successSignUp(data);
+    })
+  }
 });

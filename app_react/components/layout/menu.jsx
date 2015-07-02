@@ -13,8 +13,7 @@ module.exports = React.createClass({
     email:      React.PropTypes.string
   },
 
-  logout: function(e) {
-    // e.preventDefault();
+  logout: function() {
     actions.logout();
   },
 
@@ -58,7 +57,7 @@ module.exports = React.createClass({
   }
 });
 
-// HEADER
+// HEADER ( Скрытый хеадер )
 // <div id='header-panel' className='header-panel text-center'>
 //   <form className='panel-form'>
 //     <input type='text' className='panel-input' placeholder='Title' />

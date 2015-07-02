@@ -1,6 +1,8 @@
 'use strict';
 
 var React = require('react');
+var Reflux = require('reflux');
+
 var PostsList = require('./list.jsx');
 var Post = require('./post.jsx');
 var actions = require('../../actions/actions');
@@ -8,22 +10,30 @@ var actions = require('../../actions/actions');
 var PostStore = require('../../stores/PostStore');
 
 module.exports = React.createClass({
+  mixins: [Reflux.ListenerMixin],
+
   getInitialState: function() {
     return { data: [], loading: true };
   },
 
   componentDidMount: function() {
+    // TODO: Разве это норм подход? один колбек решил бы все проблемы
+    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
+    // в сторе создаем отдельную локальную переменную/геттер
+    // добавляем onChange...
+
+    this.listenTo(PostStore, this._onChange);
     this.readPostsFromAPI();
   },
 
   readPostsFromAPI: function() {
-    var that = this;
-    // use binding!
-    actions.getPosts(function(posts){
-      that.setState({
-        data: posts,
-        loading: false
-      });
+    actions.getPosts();
+  },
+
+  _onChange: function(){
+    this.setState({
+      data: PostStore.posts(),
+      loading: false
     });
   },
 

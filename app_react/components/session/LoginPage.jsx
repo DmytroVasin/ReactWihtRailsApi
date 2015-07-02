@@ -5,7 +5,6 @@ var Reflux = require('reflux');
 
 var Navigation = require('react-router').Navigation;
 
-// как правильно рекваирить ? ну типо с начала компоненты потом акшены потом сторы или как ? есть ли какой-то порядок ?
 var LoginStore = require('../../stores/LoginStore');
 
 var SignButton = require('../shared/SignButton.jsx');
@@ -34,46 +33,23 @@ module.exports = React.createClass({
 
     this.setState({ processing: true });
 
-    actions.login(email, password, function(loggedIn){
-      // находиться ли оно в парвильном месте ?*????
-      if (loggedIn){
-        this.replaceWith('/about');
-      }
-
-      if (!loggedIn){
-        getStateFromStores(); // - НАХУЙ НАДО? ОН ВООБЩЕ НЕ ОТРАБАТЫВАЕТ ЕПТ!
-        // this.replaceWith('/login'); // нам не нужет этот replace так как мы уже находимя на этой странце
-
-
-        // ВОПРОС: Если бы мне тут понадобилось выставить не дефолтный стейт processing: false- а какой-то другой -
-        // мне что нужно два раза просписывать setState...
-      }
-    }.bind(this));
-
-    // че за хуйня - почему тут?редиректа не будет если провалиться...
-    // правильно держать во вьюхе вроде как = но не правильно делать редирект при ошибке валидации
-    // логично это было бы делать в "LoginStore.listen" но блин там эта хрень реалирует на любое действие с locationStore...
-    // не легче делать windows.location() ?
-    // this.transitionTo('/');
+    actions.login(email, password);
   },
 
 
   componentDidMount: function() {
-    // debugger;
-    // ---- Какой из этих методов следует юзать?
-
-    // var that = this; // remove that!
-    // LoginStore.listen(function() {
-    //   that._onChange();
-    // })
-
     this.listenTo(LoginStore, this._onChange);
   },
 
-  // И че - всегда так писать ? пздц какой-то
   _onChange: function(){
-    // Этот метод дергается когда кто-то логиниться - какого хера - он не должен дергаться!!
-    // тупо как-то.
+    // TODO: тупо как-то а если три состояния - то метов onChange будет пиздец какой большой!!!
+    if ( LoginStore.isLoggedIn() ){
+      this.replaceWith('/about');
+    } else {
+      this.refs.email.getDOMNode().value = '';
+      this.refs.password.getDOMNode().value = '';
+    }
+
     this.setState( getStateFromStores() );
   },
 
@@ -81,7 +57,7 @@ module.exports = React.createClass({
     var FlashMessage = this.state.login_error_message ? (
       <div className='error login-error'>{ this.state.login_error_message }</div>
     ) : (
-      <div></div>
+      null // !!! ничего не рендерим
     );
 
     return (

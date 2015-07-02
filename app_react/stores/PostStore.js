@@ -1,24 +1,30 @@
 'use strict';
 
-// ДОХУЯ у нас сторов!
-
+require('whatwg-fetch');
 var Reflux = require('reflux');
-var request = require('superagent');
 
 var actions = require('../actions/actions');
+
+var posts = [];
 
 module.exports = Reflux.createStore({
   init: function() {
     this.listenTo(actions.getPosts, this.onGetPosts);
   },
 
+  posts: function(){
+    return posts;
+  },
+
   onGetPosts: function(cb) {
-    request.get('/v1/posts')
-      .set('Accept', 'application/json')
-      .end(function(error, res){
-        if (res && !res.error){
-          cb( JSON.parse(res.text) );
-        };
-      });
+    fetch('/v1/posts')
+      .then(function(response) {
+        return response.json()
+      }).then(function(data) {
+        if ( !data.error ){
+          posts = data;
+          this.trigger();
+        }
+      }.bind(this));
   }
 });

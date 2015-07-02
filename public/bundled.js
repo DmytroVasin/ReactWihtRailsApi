@@ -22506,8 +22506,8 @@
 	
 	
 	var App = __webpack_require__(/*! ./components/layout/application.jsx */ 193);
-	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 222);
-	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 225);
+	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 220);
+	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 224);
 	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 226);
 	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 228);
 	
@@ -22537,7 +22537,7 @@
 	var RouteHandler = __webpack_require__(/*! react-router */ 151).RouteHandler;
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216);
 	
-	var Menu = __webpack_require__(/*! ./menu.jsx */ 221);
+	var Menu = __webpack_require__(/*! ./menu.jsx */ 219);
 	
 	function getStateFromStores() {
 	  return {
@@ -22548,17 +22548,13 @@
 	
 	module.exports = React.createClass({displayName: "exports",
 	  mixins: [Reflux.ListenerMixin],
-	  // mixins: [
-	  //   Reflux.listenTo(LoginStore, '_onChange')
-	  // ],
 	
 	  getInitialState: function() {
 	    return getStateFromStores();
 	  },
 	
 	  componentDidMount: function() {
-	    // ---- Какой из этих методов следует юзать?
-	
+	    // ---- >>>> Юзать!
 	    // var that = this; // remove that!
 	    // LoginStore.listen(function() {
 	    //   that._onChange();
@@ -24169,15 +24165,15 @@
 
 	'use strict';
 	
+	__webpack_require__(/*! whatwg-fetch */ 217);
 	var Reflux = __webpack_require__(/*! reflux */ 194);
-	var request = __webpack_require__(/*! superagent */ 217);
 	
-	var actions = __webpack_require__(/*! ../actions/actions */ 220);
+	var actions = __webpack_require__(/*! ../actions/actions */ 218);
 	
 	
 	var _accessToken = sessionStorage.getItem('accessToken');
 	var _email = sessionStorage.getItem('email');
-	var _loginFlashMessage = ''; // Сама конструкция убогая - что за локальные переменные епта!
+	var _loginFlashMessage = '';
 	
 	module.exports = Reflux.createStore({
 	  init: function() {
@@ -24199,46 +24195,45 @@
 	    return _loginFlashMessage;
 	  },
 	
-	  onLogin: function(email, password, cb) {
-	    request.post('/v1/login')
-	      .send({ user: { email: email, password: password }})
-	      .set('Accept', 'application/json')
-	      .end(function(error, res){
-	        // cb(res) - так правильно дергать коллбек?
+	  onLogin: function(email, password) {
+	    fetch('/v1/login', {
+	      method: 'post',
+	      headers: {
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json'
+	      },
+	      body: JSON.stringify({
+	        user: {
+	          email: email,
+	          password: password
+	        }
+	      })
+	    }).then( function(response) {
+	      return response.json() // TODO: Че за нах - почему именно так ( не очень важно но все же )
+	    }).then(function(data) {
 	
-	        if (res && res.error){
-	          actions.unSuccessLoggin(res.text);
-	          cb(false);
-	          return;
-	        };
+	      if (data.error){
+	        return actions.unSuccessLoggin(data.error);
+	      }
 	
-	        if (res && !res.error){ // можно ли тут юзнуть res.ok?
-	          actions.successLoggin(res.text); // здесь тригериться еще одно событие - что бы можно было сделать this.trigger - это правильно?'
-	          cb(true);
-	          return;
-	        };
-	      });
+	      actions.successLoggin(data);
+	    })
 	  },
 	
-	  onSuccessLoggin: function(json_string_with_user){
-	    var json = JSON.parse(json_string_with_user);
-	    // Если слушает componentDidMount - и мне надо сделать редирект - нужно ли тригерить ?
-	    // может ли STORE слушать другой STORE
-	
-	    _accessToken = json['access_token']
-	    _email = json['email']
+	  onSuccessLoggin: function(userData){
+	    _accessToken = userData['access_token']
+	    _email = userData['email']
 	
 	    sessionStorage.setItem('accessToken', _accessToken);
 	    sessionStorage.setItem('email', _email);
 	    _loginFlashMessage = '';
 	
-	    // если я тут хочу вернуь json и какой-то статус а ниже....
-	    this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно - какие параметры принимает и как на них реагирует ?
+	    this.trigger();
 	  },
 	
-	  onUnSuccessLoggin: function(json_string_with_error){
-	    _loginFlashMessage = JSON.parse(json_string_with_error).error;
-	    // Как блин тут очистить форму?
+	  onUnSuccessLoggin: function(errorMessage){
+	    _loginFlashMessage = errorMessage;
+	
 	    this.trigger();
 	  },
 	
@@ -24248,1311 +24243,357 @@
 	
 	    sessionStorage.removeItem('accessToken');
 	    sessionStorage.removeItem('email');
-	    // а тут НАПРИМЕР хочу вернуть eror message  - как я их отличу в application.jsx по подписке
-	    // тогда не понадобиться танцевать с установкой локальных переменных: _accessToken, _email
-	    this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно
-	    // типо он всегда будет дергать - LoginStore.listen(this._onChange)?
+	    this.trigger();
 	  }
 	});
 
 
 /***/ },
 /* 217 */
-/*!************************************!*\
-  !*** ./~/superagent/lib/client.js ***!
-  \************************************/
-/***/ function(module, exports, __webpack_require__) {
+/*!*********************************!*\
+  !*** ./~/whatwg-fetch/fetch.js ***!
+  \*********************************/
+/***/ function(module, exports) {
 
-	/**
-	 * Module dependencies.
-	 */
+	(function() {
+	  'use strict';
 	
-	var Emitter = __webpack_require__(/*! emitter */ 218);
-	var reduce = __webpack_require__(/*! reduce */ 219);
-	
-	/**
-	 * Root reference for iframes.
-	 */
-	
-	var root = 'undefined' == typeof window
-	  ? this
-	  : window;
-	
-	/**
-	 * Noop.
-	 */
-	
-	function noop(){};
-	
-	/**
-	 * Check if `obj` is a host object,
-	 * we don't want to serialize these :)
-	 *
-	 * TODO: future proof, move to compoent land
-	 *
-	 * @param {Object} obj
-	 * @return {Boolean}
-	 * @api private
-	 */
-	
-	function isHost(obj) {
-	  var str = {}.toString.call(obj);
-	
-	  switch (str) {
-	    case '[object File]':
-	    case '[object Blob]':
-	    case '[object FormData]':
-	      return true;
-	    default:
-	      return false;
+	  if (self.fetch) {
+	    return
 	  }
-	}
 	
-	/**
-	 * Determine XHR.
-	 */
-	
-	function getXHR() {
-	  if (root.XMLHttpRequest
-	    && ('file:' != root.location.protocol || !root.ActiveXObject)) {
-	    return new XMLHttpRequest;
-	  } else {
-	    try { return new ActiveXObject('Microsoft.XMLHTTP'); } catch(e) {}
-	    try { return new ActiveXObject('Msxml2.XMLHTTP.6.0'); } catch(e) {}
-	    try { return new ActiveXObject('Msxml2.XMLHTTP.3.0'); } catch(e) {}
-	    try { return new ActiveXObject('Msxml2.XMLHTTP'); } catch(e) {}
+	  function normalizeName(name) {
+	    if (typeof name !== 'string') {
+	      name = name.toString();
+	    }
+	    if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
+	      throw new TypeError('Invalid character in header field name')
+	    }
+	    return name.toLowerCase()
 	  }
-	  return false;
-	}
 	
-	/**
-	 * Removes leading and trailing whitespace, added to support IE.
-	 *
-	 * @param {String} s
-	 * @return {String}
-	 * @api private
-	 */
+	  function normalizeValue(value) {
+	    if (typeof value !== 'string') {
+	      value = value.toString();
+	    }
+	    return value
+	  }
 	
-	var trim = ''.trim
-	  ? function(s) { return s.trim(); }
-	  : function(s) { return s.replace(/(^\s*|\s*$)/g, ''); };
+	  function Headers(headers) {
+	    this.map = {}
 	
-	/**
-	 * Check if `obj` is an object.
-	 *
-	 * @param {Object} obj
-	 * @return {Boolean}
-	 * @api private
-	 */
+	    var self = this
+	    if (headers instanceof Headers) {
+	      headers.forEach(function(name, values) {
+	        values.forEach(function(value) {
+	          self.append(name, value)
+	        })
+	      })
 	
-	function isObject(obj) {
-	  return obj === Object(obj);
-	}
-	
-	/**
-	 * Serialize the given `obj`.
-	 *
-	 * @param {Object} obj
-	 * @return {String}
-	 * @api private
-	 */
-	
-	function serialize(obj) {
-	  if (!isObject(obj)) return obj;
-	  var pairs = [];
-	  for (var key in obj) {
-	    if (null != obj[key]) {
-	      pairs.push(encodeURIComponent(key)
-	        + '=' + encodeURIComponent(obj[key]));
+	    } else if (headers) {
+	      Object.getOwnPropertyNames(headers).forEach(function(name) {
+	        self.append(name, headers[name])
+	      })
 	    }
 	  }
-	  return pairs.join('&');
-	}
 	
-	/**
-	 * Expose serialization method.
-	 */
-	
-	 request.serializeObject = serialize;
-	
-	 /**
-	  * Parse the given x-www-form-urlencoded `str`.
-	  *
-	  * @param {String} str
-	  * @return {Object}
-	  * @api private
-	  */
-	
-	function parseString(str) {
-	  var obj = {};
-	  var pairs = str.split('&');
-	  var parts;
-	  var pair;
-	
-	  for (var i = 0, len = pairs.length; i < len; ++i) {
-	    pair = pairs[i];
-	    parts = pair.split('=');
-	    obj[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+	  Headers.prototype.append = function(name, value) {
+	    name = normalizeName(name)
+	    value = normalizeValue(value)
+	    var list = this.map[name]
+	    if (!list) {
+	      list = []
+	      this.map[name] = list
+	    }
+	    list.push(value)
 	  }
 	
-	  return obj;
-	}
-	
-	/**
-	 * Expose parser.
-	 */
-	
-	request.parseString = parseString;
-	
-	/**
-	 * Default MIME type map.
-	 *
-	 *     superagent.types.xml = 'application/xml';
-	 *
-	 */
-	
-	request.types = {
-	  html: 'text/html',
-	  json: 'application/json',
-	  xml: 'application/xml',
-	  urlencoded: 'application/x-www-form-urlencoded',
-	  'form': 'application/x-www-form-urlencoded',
-	  'form-data': 'application/x-www-form-urlencoded'
-	};
-	
-	/**
-	 * Default serialization map.
-	 *
-	 *     superagent.serialize['application/xml'] = function(obj){
-	 *       return 'generated xml here';
-	 *     };
-	 *
-	 */
-	
-	 request.serialize = {
-	   'application/x-www-form-urlencoded': serialize,
-	   'application/json': JSON.stringify
-	 };
-	
-	 /**
-	  * Default parsers.
-	  *
-	  *     superagent.parse['application/xml'] = function(str){
-	  *       return { object parsed from str };
-	  *     };
-	  *
-	  */
-	
-	request.parse = {
-	  'application/x-www-form-urlencoded': parseString,
-	  'application/json': JSON.parse
-	};
-	
-	/**
-	 * Parse the given header `str` into
-	 * an object containing the mapped fields.
-	 *
-	 * @param {String} str
-	 * @return {Object}
-	 * @api private
-	 */
-	
-	function parseHeader(str) {
-	  var lines = str.split(/\r?\n/);
-	  var fields = {};
-	  var index;
-	  var line;
-	  var field;
-	  var val;
-	
-	  lines.pop(); // trailing CRLF
-	
-	  for (var i = 0, len = lines.length; i < len; ++i) {
-	    line = lines[i];
-	    index = line.indexOf(':');
-	    field = line.slice(0, index).toLowerCase();
-	    val = trim(line.slice(index + 1));
-	    fields[field] = val;
+	  Headers.prototype['delete'] = function(name) {
+	    delete this.map[normalizeName(name)]
 	  }
 	
-	  return fields;
-	}
-	
-	/**
-	 * Return the mime type for the given `str`.
-	 *
-	 * @param {String} str
-	 * @return {String}
-	 * @api private
-	 */
-	
-	function type(str){
-	  return str.split(/ *; */).shift();
-	};
-	
-	/**
-	 * Return header field parameters.
-	 *
-	 * @param {String} str
-	 * @return {Object}
-	 * @api private
-	 */
-	
-	function params(str){
-	  return reduce(str.split(/ *; */), function(obj, str){
-	    var parts = str.split(/ *= */)
-	      , key = parts.shift()
-	      , val = parts.shift();
-	
-	    if (key && val) obj[key] = val;
-	    return obj;
-	  }, {});
-	};
-	
-	/**
-	 * Initialize a new `Response` with the given `xhr`.
-	 *
-	 *  - set flags (.ok, .error, etc)
-	 *  - parse header
-	 *
-	 * Examples:
-	 *
-	 *  Aliasing `superagent` as `request` is nice:
-	 *
-	 *      request = superagent;
-	 *
-	 *  We can use the promise-like API, or pass callbacks:
-	 *
-	 *      request.get('/').end(function(res){});
-	 *      request.get('/', function(res){});
-	 *
-	 *  Sending data can be chained:
-	 *
-	 *      request
-	 *        .post('/user')
-	 *        .send({ name: 'tj' })
-	 *        .end(function(res){});
-	 *
-	 *  Or passed to `.send()`:
-	 *
-	 *      request
-	 *        .post('/user')
-	 *        .send({ name: 'tj' }, function(res){});
-	 *
-	 *  Or passed to `.post()`:
-	 *
-	 *      request
-	 *        .post('/user', { name: 'tj' })
-	 *        .end(function(res){});
-	 *
-	 * Or further reduced to a single call for simple cases:
-	 *
-	 *      request
-	 *        .post('/user', { name: 'tj' }, function(res){});
-	 *
-	 * @param {XMLHTTPRequest} xhr
-	 * @param {Object} options
-	 * @api private
-	 */
-	
-	function Response(req, options) {
-	  options = options || {};
-	  this.req = req;
-	  this.xhr = this.req.xhr;
-	  this.text = this.req.method !='HEAD' 
-	     ? this.xhr.responseText 
-	     : null;
-	  this.setStatusProperties(this.xhr.status);
-	  this.header = this.headers = parseHeader(this.xhr.getAllResponseHeaders());
-	  // getAllResponseHeaders sometimes falsely returns "" for CORS requests, but
-	  // getResponseHeader still works. so we get content-type even if getting
-	  // other headers fails.
-	  this.header['content-type'] = this.xhr.getResponseHeader('content-type');
-	  this.setHeaderProperties(this.header);
-	  this.body = this.req.method != 'HEAD'
-	    ? this.parseBody(this.text)
-	    : null;
-	}
-	
-	/**
-	 * Get case-insensitive `field` value.
-	 *
-	 * @param {String} field
-	 * @return {String}
-	 * @api public
-	 */
-	
-	Response.prototype.get = function(field){
-	  return this.header[field.toLowerCase()];
-	};
-	
-	/**
-	 * Set header related properties:
-	 *
-	 *   - `.type` the content type without params
-	 *
-	 * A response of "Content-Type: text/plain; charset=utf-8"
-	 * will provide you with a `.type` of "text/plain".
-	 *
-	 * @param {Object} header
-	 * @api private
-	 */
-	
-	Response.prototype.setHeaderProperties = function(header){
-	  // content-type
-	  var ct = this.header['content-type'] || '';
-	  this.type = type(ct);
-	
-	  // params
-	  var obj = params(ct);
-	  for (var key in obj) this[key] = obj[key];
-	};
-	
-	/**
-	 * Parse the given body `str`.
-	 *
-	 * Used for auto-parsing of bodies. Parsers
-	 * are defined on the `superagent.parse` object.
-	 *
-	 * @param {String} str
-	 * @return {Mixed}
-	 * @api private
-	 */
-	
-	Response.prototype.parseBody = function(str){
-	  var parse = request.parse[this.type];
-	  return parse && str && str.length
-	    ? parse(str)
-	    : null;
-	};
-	
-	/**
-	 * Set flags such as `.ok` based on `status`.
-	 *
-	 * For example a 2xx response will give you a `.ok` of __true__
-	 * whereas 5xx will be __false__ and `.error` will be __true__. The
-	 * `.clientError` and `.serverError` are also available to be more
-	 * specific, and `.statusType` is the class of error ranging from 1..5
-	 * sometimes useful for mapping respond colors etc.
-	 *
-	 * "sugar" properties are also defined for common cases. Currently providing:
-	 *
-	 *   - .noContent
-	 *   - .badRequest
-	 *   - .unauthorized
-	 *   - .notAcceptable
-	 *   - .notFound
-	 *
-	 * @param {Number} status
-	 * @api private
-	 */
-	
-	Response.prototype.setStatusProperties = function(status){
-	  var type = status / 100 | 0;
-	
-	  // status / class
-	  this.status = status;
-	  this.statusType = type;
-	
-	  // basics
-	  this.info = 1 == type;
-	  this.ok = 2 == type;
-	  this.clientError = 4 == type;
-	  this.serverError = 5 == type;
-	  this.error = (4 == type || 5 == type)
-	    ? this.toError()
-	    : false;
-	
-	  // sugar
-	  this.accepted = 202 == status;
-	  this.noContent = 204 == status || 1223 == status;
-	  this.badRequest = 400 == status;
-	  this.unauthorized = 401 == status;
-	  this.notAcceptable = 406 == status;
-	  this.notFound = 404 == status;
-	  this.forbidden = 403 == status;
-	};
-	
-	/**
-	 * Return an `Error` representative of this response.
-	 *
-	 * @return {Error}
-	 * @api public
-	 */
-	
-	Response.prototype.toError = function(){
-	  var req = this.req;
-	  var method = req.method;
-	  var url = req.url;
-	
-	  var msg = 'cannot ' + method + ' ' + url + ' (' + this.status + ')';
-	  var err = new Error(msg);
-	  err.status = this.status;
-	  err.method = method;
-	  err.url = url;
-	
-	  return err;
-	};
-	
-	/**
-	 * Expose `Response`.
-	 */
-	
-	request.Response = Response;
-	
-	/**
-	 * Initialize a new `Request` with the given `method` and `url`.
-	 *
-	 * @param {String} method
-	 * @param {String} url
-	 * @api public
-	 */
-	
-	function Request(method, url) {
-	  var self = this;
-	  Emitter.call(this);
-	  this._query = this._query || [];
-	  this.method = method;
-	  this.url = url;
-	  this.header = {};
-	  this._header = {};
-	  this.on('end', function(){
-	    var err = null;
-	    var res = null;
-	
-	    try {
-	      res = new Response(self); 
-	    } catch(e) {
-	      err = new Error('Parser is unable to parse the response');
-	      err.parse = true;
-	      err.original = e;
-	    }
-	
-	    self.callback(err, res);
-	  });
-	}
-	
-	/**
-	 * Mixin `Emitter`.
-	 */
-	
-	Emitter(Request.prototype);
-	
-	/**
-	 * Allow for extension
-	 */
-	
-	Request.prototype.use = function(fn) {
-	  fn(this);
-	  return this;
-	}
-	
-	/**
-	 * Set timeout to `ms`.
-	 *
-	 * @param {Number} ms
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.timeout = function(ms){
-	  this._timeout = ms;
-	  return this;
-	};
-	
-	/**
-	 * Clear previous timeout.
-	 *
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.clearTimeout = function(){
-	  this._timeout = 0;
-	  clearTimeout(this._timer);
-	  return this;
-	};
-	
-	/**
-	 * Abort the request, and clear potential timeout.
-	 *
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	Request.prototype.abort = function(){
-	  if (this.aborted) return;
-	  this.aborted = true;
-	  this.xhr.abort();
-	  this.clearTimeout();
-	  this.emit('abort');
-	  return this;
-	};
-	
-	/**
-	 * Set header `field` to `val`, or multiple fields with one object.
-	 *
-	 * Examples:
-	 *
-	 *      req.get('/')
-	 *        .set('Accept', 'application/json')
-	 *        .set('X-API-Key', 'foobar')
-	 *        .end(callback);
-	 *
-	 *      req.get('/')
-	 *        .set({ Accept: 'application/json', 'X-API-Key': 'foobar' })
-	 *        .end(callback);
-	 *
-	 * @param {String|Object} field
-	 * @param {String} val
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.set = function(field, val){
-	  if (isObject(field)) {
-	    for (var key in field) {
-	      this.set(key, field[key]);
-	    }
-	    return this;
+	  Headers.prototype.get = function(name) {
+	    var values = this.map[normalizeName(name)]
+	    return values ? values[0] : null
 	  }
-	  this._header[field.toLowerCase()] = val;
-	  this.header[field] = val;
-	  return this;
-	};
 	
-	/**
-	 * Remove header `field`.
-	 *
-	 * Example:
-	 *
-	 *      req.get('/')
-	 *        .unset('User-Agent')
-	 *        .end(callback);
-	 *
-	 * @param {String} field
-	 * @return {Request} for chaining
-	 * @api public
-	 */
+	  Headers.prototype.getAll = function(name) {
+	    return this.map[normalizeName(name)] || []
+	  }
 	
-	Request.prototype.unset = function(field){
-	  delete this._header[field.toLowerCase()];
-	  delete this.header[field];
-	  return this;
-	};
+	  Headers.prototype.has = function(name) {
+	    return this.map.hasOwnProperty(normalizeName(name))
+	  }
 	
-	/**
-	 * Get case-insensitive header `field` value.
-	 *
-	 * @param {String} field
-	 * @return {String}
-	 * @api private
-	 */
+	  Headers.prototype.set = function(name, value) {
+	    this.map[normalizeName(name)] = [normalizeValue(value)]
+	  }
 	
-	Request.prototype.getHeader = function(field){
-	  return this._header[field.toLowerCase()];
-	};
+	  // Instead of iterable for now.
+	  Headers.prototype.forEach = function(callback) {
+	    var self = this
+	    Object.getOwnPropertyNames(this.map).forEach(function(name) {
+	      callback(name, self.map[name])
+	    })
+	  }
 	
-	/**
-	 * Set Content-Type to `type`, mapping values from `request.types`.
-	 *
-	 * Examples:
-	 *
-	 *      superagent.types.xml = 'application/xml';
-	 *
-	 *      request.post('/')
-	 *        .type('xml')
-	 *        .send(xmlstring)
-	 *        .end(callback);
-	 *
-	 *      request.post('/')
-	 *        .type('application/xml')
-	 *        .send(xmlstring)
-	 *        .end(callback);
-	 *
-	 * @param {String} type
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.type = function(type){
-	  this.set('Content-Type', request.types[type] || type);
-	  return this;
-	};
-	
-	/**
-	 * Set Accept to `type`, mapping values from `request.types`.
-	 *
-	 * Examples:
-	 *
-	 *      superagent.types.json = 'application/json';
-	 *
-	 *      request.get('/agent')
-	 *        .accept('json')
-	 *        .end(callback);
-	 *
-	 *      request.get('/agent')
-	 *        .accept('application/json')
-	 *        .end(callback);
-	 *
-	 * @param {String} accept
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.accept = function(type){
-	  this.set('Accept', request.types[type] || type);
-	  return this;
-	};
-	
-	/**
-	 * Set Authorization field value with `user` and `pass`.
-	 *
-	 * @param {String} user
-	 * @param {String} pass
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.auth = function(user, pass){
-	  var str = btoa(user + ':' + pass);
-	  this.set('Authorization', 'Basic ' + str);
-	  return this;
-	};
-	
-	/**
-	* Add query-string `val`.
-	*
-	* Examples:
-	*
-	*   request.get('/shoes')
-	*     .query('size=10')
-	*     .query({ color: 'blue' })
-	*
-	* @param {Object|String} val
-	* @return {Request} for chaining
-	* @api public
-	*/
-	
-	Request.prototype.query = function(val){
-	  if ('string' != typeof val) val = serialize(val);
-	  if (val) this._query.push(val);
-	  return this;
-	};
-	
-	/**
-	 * Write the field `name` and `val` for "multipart/form-data"
-	 * request bodies.
-	 *
-	 * ``` js
-	 * request.post('/upload')
-	 *   .field('foo', 'bar')
-	 *   .end(callback);
-	 * ```
-	 *
-	 * @param {String} name
-	 * @param {String|Blob|File} val
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.field = function(name, val){
-	  if (!this._formData) this._formData = new FormData();
-	  this._formData.append(name, val);
-	  return this;
-	};
-	
-	/**
-	 * Queue the given `file` as an attachment to the specified `field`,
-	 * with optional `filename`.
-	 *
-	 * ``` js
-	 * request.post('/upload')
-	 *   .attach(new Blob(['<a id="a"><b id="b">hey!</b></a>'], { type: "text/html"}))
-	 *   .end(callback);
-	 * ```
-	 *
-	 * @param {String} field
-	 * @param {Blob|File} file
-	 * @param {String} filename
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.attach = function(field, file, filename){
-	  if (!this._formData) this._formData = new FormData();
-	  this._formData.append(field, file, filename);
-	  return this;
-	};
-	
-	/**
-	 * Send `data`, defaulting the `.type()` to "json" when
-	 * an object is given.
-	 *
-	 * Examples:
-	 *
-	 *       // querystring
-	 *       request.get('/search')
-	 *         .end(callback)
-	 *
-	 *       // multiple data "writes"
-	 *       request.get('/search')
-	 *         .send({ search: 'query' })
-	 *         .send({ range: '1..5' })
-	 *         .send({ order: 'desc' })
-	 *         .end(callback)
-	 *
-	 *       // manual json
-	 *       request.post('/user')
-	 *         .type('json')
-	 *         .send('{"name":"tj"})
-	 *         .end(callback)
-	 *
-	 *       // auto json
-	 *       request.post('/user')
-	 *         .send({ name: 'tj' })
-	 *         .end(callback)
-	 *
-	 *       // manual x-www-form-urlencoded
-	 *       request.post('/user')
-	 *         .type('form')
-	 *         .send('name=tj')
-	 *         .end(callback)
-	 *
-	 *       // auto x-www-form-urlencoded
-	 *       request.post('/user')
-	 *         .type('form')
-	 *         .send({ name: 'tj' })
-	 *         .end(callback)
-	 *
-	 *       // defaults to x-www-form-urlencoded
-	  *      request.post('/user')
-	  *        .send('name=tobi')
-	  *        .send('species=ferret')
-	  *        .end(callback)
-	 *
-	 * @param {String|Object} data
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.send = function(data){
-	  var obj = isObject(data);
-	  var type = this.getHeader('Content-Type');
-	
-	  // merge
-	  if (obj && isObject(this._data)) {
-	    for (var key in data) {
-	      this._data[key] = data[key];
+	  function consumed(body) {
+	    if (body.bodyUsed) {
+	      return Promise.reject(new TypeError('Already read'))
 	    }
-	  } else if ('string' == typeof data) {
-	    if (!type) this.type('form');
-	    type = this.getHeader('Content-Type');
-	    if ('application/x-www-form-urlencoded' == type) {
-	      this._data = this._data
-	        ? this._data + '&' + data
-	        : data;
+	    body.bodyUsed = true
+	  }
+	
+	  function fileReaderReady(reader) {
+	    return new Promise(function(resolve, reject) {
+	      reader.onload = function() {
+	        resolve(reader.result)
+	      }
+	      reader.onerror = function() {
+	        reject(reader.error)
+	      }
+	    })
+	  }
+	
+	  function readBlobAsArrayBuffer(blob) {
+	    var reader = new FileReader()
+	    reader.readAsArrayBuffer(blob)
+	    return fileReaderReady(reader)
+	  }
+	
+	  function readBlobAsText(blob) {
+	    var reader = new FileReader()
+	    reader.readAsText(blob)
+	    return fileReaderReady(reader)
+	  }
+	
+	  var support = {
+	    blob: 'FileReader' in self && 'Blob' in self && (function() {
+	      try {
+	        new Blob();
+	        return true
+	      } catch(e) {
+	        return false
+	      }
+	    })(),
+	    formData: 'FormData' in self
+	  }
+	
+	  function Body() {
+	    this.bodyUsed = false
+	
+	
+	    this._initBody = function(body) {
+	      this._bodyInit = body
+	      if (typeof body === 'string') {
+	        this._bodyText = body
+	      } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+	        this._bodyBlob = body
+	      } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+	        this._bodyFormData = body
+	      } else if (!body) {
+	        this._bodyText = ''
+	      } else {
+	        throw new Error('unsupported BodyInit type')
+	      }
+	    }
+	
+	    if (support.blob) {
+	      this.blob = function() {
+	        var rejected = consumed(this)
+	        if (rejected) {
+	          return rejected
+	        }
+	
+	        if (this._bodyBlob) {
+	          return Promise.resolve(this._bodyBlob)
+	        } else if (this._bodyFormData) {
+	          throw new Error('could not read FormData body as blob')
+	        } else {
+	          return Promise.resolve(new Blob([this._bodyText]))
+	        }
+	      }
+	
+	      this.arrayBuffer = function() {
+	        return this.blob().then(readBlobAsArrayBuffer)
+	      }
+	
+	      this.text = function() {
+	        var rejected = consumed(this)
+	        if (rejected) {
+	          return rejected
+	        }
+	
+	        if (this._bodyBlob) {
+	          return readBlobAsText(this._bodyBlob)
+	        } else if (this._bodyFormData) {
+	          throw new Error('could not read FormData body as text')
+	        } else {
+	          return Promise.resolve(this._bodyText)
+	        }
+	      }
 	    } else {
-	      this._data = (this._data || '') + data;
+	      this.text = function() {
+	        var rejected = consumed(this)
+	        return rejected ? rejected : Promise.resolve(this._bodyText)
+	      }
 	    }
-	  } else {
-	    this._data = data;
-	  }
 	
-	  if (!obj) return this;
-	  if (!type) this.type('json');
-	  return this;
-	};
-	
-	/**
-	 * Invoke the callback with `err` and `res`
-	 * and handle arity check.
-	 *
-	 * @param {Error} err
-	 * @param {Response} res
-	 * @api private
-	 */
-	
-	Request.prototype.callback = function(err, res){
-	  var fn = this._callback;
-	  this.clearTimeout();
-	  if (2 == fn.length) return fn(err, res);
-	  if (err) return this.emit('error', err);
-	  fn(res);
-	};
-	
-	/**
-	 * Invoke callback with x-domain error.
-	 *
-	 * @api private
-	 */
-	
-	Request.prototype.crossDomainError = function(){
-	  var err = new Error('Origin is not allowed by Access-Control-Allow-Origin');
-	  err.crossDomain = true;
-	  this.callback(err);
-	};
-	
-	/**
-	 * Invoke callback with timeout error.
-	 *
-	 * @api private
-	 */
-	
-	Request.prototype.timeoutError = function(){
-	  var timeout = this._timeout;
-	  var err = new Error('timeout of ' + timeout + 'ms exceeded');
-	  err.timeout = timeout;
-	  this.callback(err);
-	};
-	
-	/**
-	 * Enable transmission of cookies with x-domain requests.
-	 *
-	 * Note that for this to work the origin must not be
-	 * using "Access-Control-Allow-Origin" with a wildcard,
-	 * and also must set "Access-Control-Allow-Credentials"
-	 * to "true".
-	 *
-	 * @api public
-	 */
-	
-	Request.prototype.withCredentials = function(){
-	  this._withCredentials = true;
-	  return this;
-	};
-	
-	/**
-	 * Initiate request, invoking callback `fn(res)`
-	 * with an instanceof `Response`.
-	 *
-	 * @param {Function} fn
-	 * @return {Request} for chaining
-	 * @api public
-	 */
-	
-	Request.prototype.end = function(fn){
-	  var self = this;
-	  var xhr = this.xhr = getXHR();
-	  var query = this._query.join('&');
-	  var timeout = this._timeout;
-	  var data = this._formData || this._data;
-	
-	  // store callback
-	  this._callback = fn || noop;
-	
-	  // state change
-	  xhr.onreadystatechange = function(){
-	    if (4 != xhr.readyState) return;
-	    if (0 == xhr.status) {
-	      if (self.aborted) return self.timeoutError();
-	      return self.crossDomainError();
+	    if (support.formData) {
+	      this.formData = function() {
+	        return this.text().then(decode)
+	      }
 	    }
-	    self.emit('end');
-	  };
 	
-	  // progress
-	  if (xhr.upload) {
-	    xhr.upload.onprogress = function(e){
-	      e.percent = e.loaded / e.total * 100;
-	      self.emit('progress', e);
-	    };
+	    this.json = function() {
+	      return this.text().then(JSON.parse)
+	    }
+	
+	    return this
 	  }
 	
-	  // timeout
-	  if (timeout && !this._timer) {
-	    this._timer = setTimeout(function(){
-	      self.abort();
-	    }, timeout);
+	  // HTTP methods whose capitalization should be normalized
+	  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT']
+	
+	  function normalizeMethod(method) {
+	    var upcased = method.toUpperCase()
+	    return (methods.indexOf(upcased) > -1) ? upcased : method
 	  }
 	
-	  // querystring
-	  if (query) {
-	    query = request.serializeObject(query);
-	    this.url += ~this.url.indexOf('?')
-	      ? '&' + query
-	      : '?' + query;
+	  function Request(url, options) {
+	    options = options || {}
+	    this.url = url
+	
+	    this.credentials = options.credentials || 'omit'
+	    this.headers = new Headers(options.headers)
+	    this.method = normalizeMethod(options.method || 'GET')
+	    this.mode = options.mode || null
+	    this.referrer = null
+	
+	    if ((this.method === 'GET' || this.method === 'HEAD') && options.body) {
+	      throw new TypeError('Body not allowed for GET or HEAD requests')
+	    }
+	    this._initBody(options.body)
 	  }
 	
-	  // initiate request
-	  xhr.open(this.method, this.url, true);
-	
-	  // CORS
-	  if (this._withCredentials) xhr.withCredentials = true;
-	
-	  // body
-	  if ('GET' != this.method && 'HEAD' != this.method && 'string' != typeof data && !isHost(data)) {
-	    // serialize stuff
-	    var serialize = request.serialize[this.getHeader('Content-Type')];
-	    if (serialize) data = serialize(data);
+	  function decode(body) {
+	    var form = new FormData()
+	    body.trim().split('&').forEach(function(bytes) {
+	      if (bytes) {
+	        var split = bytes.split('=')
+	        var name = split.shift().replace(/\+/g, ' ')
+	        var value = split.join('=').replace(/\+/g, ' ')
+	        form.append(decodeURIComponent(name), decodeURIComponent(value))
+	      }
+	    })
+	    return form
 	  }
 	
-	  // set header fields
-	  for (var field in this.header) {
-	    if (null == this.header[field]) continue;
-	    xhr.setRequestHeader(field, this.header[field]);
+	  function headers(xhr) {
+	    var head = new Headers()
+	    var pairs = xhr.getAllResponseHeaders().trim().split('\n')
+	    pairs.forEach(function(header) {
+	      var split = header.trim().split(':')
+	      var key = split.shift().trim()
+	      var value = split.join(':').trim()
+	      head.append(key, value)
+	    })
+	    return head
 	  }
 	
-	  // send stuff
-	  this.emit('request', this);
-	  xhr.send(data);
-	  return this;
-	};
+	  Body.call(Request.prototype)
 	
-	/**
-	 * Expose `Request`.
-	 */
+	  function Response(bodyInit, options) {
+	    if (!options) {
+	      options = {}
+	    }
 	
-	request.Request = Request;
-	
-	/**
-	 * Issue a request:
-	 *
-	 * Examples:
-	 *
-	 *    request('GET', '/users').end(callback)
-	 *    request('/users').end(callback)
-	 *    request('/users', callback)
-	 *
-	 * @param {String} method
-	 * @param {String|Function} url or callback
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	function request(method, url) {
-	  // callback
-	  if ('function' == typeof url) {
-	    return new Request('GET', method).end(url);
+	    this._initBody(bodyInit)
+	    this.type = 'default'
+	    this.url = null
+	    this.status = options.status
+	    this.ok = this.status >= 200 && this.status < 300
+	    this.statusText = options.statusText
+	    this.headers = options.headers instanceof Headers ? options.headers : new Headers(options.headers)
+	    this.url = options.url || ''
 	  }
 	
-	  // url first
-	  if (1 == arguments.length) {
-	    return new Request('GET', method);
+	  Body.call(Response.prototype)
+	
+	  self.Headers = Headers;
+	  self.Request = Request;
+	  self.Response = Response;
+	
+	  self.fetch = function(input, init) {
+	    // TODO: Request constructor should accept input, init
+	    var request
+	    if (Request.prototype.isPrototypeOf(input) && !init) {
+	      request = input
+	    } else {
+	      request = new Request(input, init)
+	    }
+	
+	    return new Promise(function(resolve, reject) {
+	      var xhr = new XMLHttpRequest()
+	
+	      function responseURL() {
+	        if ('responseURL' in xhr) {
+	          return xhr.responseURL
+	        }
+	
+	        // Avoid security warnings on getResponseHeader when not allowed by CORS
+	        if (/^X-Request-URL:/m.test(xhr.getAllResponseHeaders())) {
+	          return xhr.getResponseHeader('X-Request-URL')
+	        }
+	
+	        return;
+	      }
+	
+	      xhr.onload = function() {
+	        var status = (xhr.status === 1223) ? 204 : xhr.status
+	        if (status < 100 || status > 599) {
+	          reject(new TypeError('Network request failed'))
+	          return
+	        }
+	        var options = {
+	          status: status,
+	          statusText: xhr.statusText,
+	          headers: headers(xhr),
+	          url: responseURL()
+	        }
+	        var body = 'response' in xhr ? xhr.response : xhr.responseText;
+	        resolve(new Response(body, options))
+	      }
+	
+	      xhr.onerror = function() {
+	        reject(new TypeError('Network request failed'))
+	      }
+	
+	      xhr.open(request.method, request.url, true)
+	
+	      if (request.credentials === 'include') {
+	        xhr.withCredentials = true
+	      }
+	
+	      if ('responseType' in xhr && support.blob) {
+	        xhr.responseType = 'blob'
+	      }
+	
+	      request.headers.forEach(function(name, values) {
+	        values.forEach(function(value) {
+	          xhr.setRequestHeader(name, value)
+	        })
+	      })
+	
+	      xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit)
+	    })
 	  }
-	
-	  return new Request(method, url);
-	}
-	
-	/**
-	 * GET `url` with optional callback `fn(res)`.
-	 *
-	 * @param {String} url
-	 * @param {Mixed|Function} data or fn
-	 * @param {Function} fn
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	request.get = function(url, data, fn){
-	  var req = request('GET', url);
-	  if ('function' == typeof data) fn = data, data = null;
-	  if (data) req.query(data);
-	  if (fn) req.end(fn);
-	  return req;
-	};
-	
-	/**
-	 * HEAD `url` with optional callback `fn(res)`.
-	 *
-	 * @param {String} url
-	 * @param {Mixed|Function} data or fn
-	 * @param {Function} fn
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	request.head = function(url, data, fn){
-	  var req = request('HEAD', url);
-	  if ('function' == typeof data) fn = data, data = null;
-	  if (data) req.send(data);
-	  if (fn) req.end(fn);
-	  return req;
-	};
-	
-	/**
-	 * DELETE `url` with optional callback `fn(res)`.
-	 *
-	 * @param {String} url
-	 * @param {Function} fn
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	request.del = function(url, fn){
-	  var req = request('DELETE', url);
-	  if (fn) req.end(fn);
-	  return req;
-	};
-	
-	/**
-	 * PATCH `url` with optional `data` and callback `fn(res)`.
-	 *
-	 * @param {String} url
-	 * @param {Mixed} data
-	 * @param {Function} fn
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	request.patch = function(url, data, fn){
-	  var req = request('PATCH', url);
-	  if ('function' == typeof data) fn = data, data = null;
-	  if (data) req.send(data);
-	  if (fn) req.end(fn);
-	  return req;
-	};
-	
-	/**
-	 * POST `url` with optional `data` and callback `fn(res)`.
-	 *
-	 * @param {String} url
-	 * @param {Mixed} data
-	 * @param {Function} fn
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	request.post = function(url, data, fn){
-	  var req = request('POST', url);
-	  if ('function' == typeof data) fn = data, data = null;
-	  if (data) req.send(data);
-	  if (fn) req.end(fn);
-	  return req;
-	};
-	
-	/**
-	 * PUT `url` with optional `data` and callback `fn(res)`.
-	 *
-	 * @param {String} url
-	 * @param {Mixed|Function} data or fn
-	 * @param {Function} fn
-	 * @return {Request}
-	 * @api public
-	 */
-	
-	request.put = function(url, data, fn){
-	  var req = request('PUT', url);
-	  if ('function' == typeof data) fn = data, data = null;
-	  if (data) req.send(data);
-	  if (fn) req.end(fn);
-	  return req;
-	};
-	
-	/**
-	 * Expose `request`.
-	 */
-	
-	module.exports = request;
+	  self.fetch.polyfill = true
+	})();
 
 
 /***/ },
 /* 218 */
-/*!***************************************************!*\
-  !*** ./~/superagent/~/component-emitter/index.js ***!
-  \***************************************************/
-/***/ function(module, exports) {
-
-	
-	/**
-	 * Expose `Emitter`.
-	 */
-	
-	module.exports = Emitter;
-	
-	/**
-	 * Initialize a new `Emitter`.
-	 *
-	 * @api public
-	 */
-	
-	function Emitter(obj) {
-	  if (obj) return mixin(obj);
-	};
-	
-	/**
-	 * Mixin the emitter properties.
-	 *
-	 * @param {Object} obj
-	 * @return {Object}
-	 * @api private
-	 */
-	
-	function mixin(obj) {
-	  for (var key in Emitter.prototype) {
-	    obj[key] = Emitter.prototype[key];
-	  }
-	  return obj;
-	}
-	
-	/**
-	 * Listen on the given `event` with `fn`.
-	 *
-	 * @param {String} event
-	 * @param {Function} fn
-	 * @return {Emitter}
-	 * @api public
-	 */
-	
-	Emitter.prototype.on =
-	Emitter.prototype.addEventListener = function(event, fn){
-	  this._callbacks = this._callbacks || {};
-	  (this._callbacks[event] = this._callbacks[event] || [])
-	    .push(fn);
-	  return this;
-	};
-	
-	/**
-	 * Adds an `event` listener that will be invoked a single
-	 * time then automatically removed.
-	 *
-	 * @param {String} event
-	 * @param {Function} fn
-	 * @return {Emitter}
-	 * @api public
-	 */
-	
-	Emitter.prototype.once = function(event, fn){
-	  var self = this;
-	  this._callbacks = this._callbacks || {};
-	
-	  function on() {
-	    self.off(event, on);
-	    fn.apply(this, arguments);
-	  }
-	
-	  on.fn = fn;
-	  this.on(event, on);
-	  return this;
-	};
-	
-	/**
-	 * Remove the given callback for `event` or all
-	 * registered callbacks.
-	 *
-	 * @param {String} event
-	 * @param {Function} fn
-	 * @return {Emitter}
-	 * @api public
-	 */
-	
-	Emitter.prototype.off =
-	Emitter.prototype.removeListener =
-	Emitter.prototype.removeAllListeners =
-	Emitter.prototype.removeEventListener = function(event, fn){
-	  this._callbacks = this._callbacks || {};
-	
-	  // all
-	  if (0 == arguments.length) {
-	    this._callbacks = {};
-	    return this;
-	  }
-	
-	  // specific event
-	  var callbacks = this._callbacks[event];
-	  if (!callbacks) return this;
-	
-	  // remove all handlers
-	  if (1 == arguments.length) {
-	    delete this._callbacks[event];
-	    return this;
-	  }
-	
-	  // remove specific handler
-	  var cb;
-	  for (var i = 0; i < callbacks.length; i++) {
-	    cb = callbacks[i];
-	    if (cb === fn || cb.fn === fn) {
-	      callbacks.splice(i, 1);
-	      break;
-	    }
-	  }
-	  return this;
-	};
-	
-	/**
-	 * Emit `event` with the given args.
-	 *
-	 * @param {String} event
-	 * @param {Mixed} ...
-	 * @return {Emitter}
-	 */
-	
-	Emitter.prototype.emit = function(event){
-	  this._callbacks = this._callbacks || {};
-	  var args = [].slice.call(arguments, 1)
-	    , callbacks = this._callbacks[event];
-	
-	  if (callbacks) {
-	    callbacks = callbacks.slice(0);
-	    for (var i = 0, len = callbacks.length; i < len; ++i) {
-	      callbacks[i].apply(this, args);
-	    }
-	  }
-	
-	  return this;
-	};
-	
-	/**
-	 * Return array of callbacks for `event`.
-	 *
-	 * @param {String} event
-	 * @return {Array}
-	 * @api public
-	 */
-	
-	Emitter.prototype.listeners = function(event){
-	  this._callbacks = this._callbacks || {};
-	  return this._callbacks[event] || [];
-	};
-	
-	/**
-	 * Check if this emitter has `event` handlers.
-	 *
-	 * @param {String} event
-	 * @return {Boolean}
-	 * @api public
-	 */
-	
-	Emitter.prototype.hasListeners = function(event){
-	  return !! this.listeners(event).length;
-	};
-
-
-/***/ },
-/* 219 */
-/*!**************************************************!*\
-  !*** ./~/superagent/~/reduce-component/index.js ***!
-  \**************************************************/
-/***/ function(module, exports) {
-
-	
-	/**
-	 * Reduce `arr` with `fn`.
-	 *
-	 * @param {Array} arr
-	 * @param {Function} fn
-	 * @param {Mixed} initial
-	 *
-	 * TODO: combatible error handling?
-	 */
-	
-	module.exports = function(arr, fn, initial){  
-	  var idx = 0;
-	  var len = arr.length;
-	  var curr = arguments.length == 3
-	    ? initial
-	    : arr[idx++];
-	
-	  while (idx < len) {
-	    curr = fn.call(null, curr, arr[idx], ++idx, arr);
-	  }
-	  
-	  return curr;
-	};
-
-/***/ },
-/* 220 */
 /*!**************************************!*\
   !*** ./app_react/actions/actions.js ***!
   \**************************************/
@@ -25579,7 +24620,7 @@
 
 
 /***/ },
-/* 221 */
+/* 219 */
 /*!**********************************************!*\
   !*** ./app_react/components/layout/menu.jsx ***!
   \**********************************************/
@@ -25590,7 +24631,7 @@
 	var React = __webpack_require__(/*! react */ 3);
 	var Router = __webpack_require__(/*! react-router */ 151);
 	
-	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
 	
 	var Link = Router.Link;
 	
@@ -25600,8 +24641,7 @@
 	    email:      React.PropTypes.string
 	  },
 	
-	  logout: function(e) {
-	    // e.preventDefault();
+	  logout: function() {
 	    actions.logout();
 	  },
 	
@@ -25645,7 +24685,7 @@
 	  }
 	});
 	
-	// HEADER
+	// HEADER ( Скрытый хеадер )
 	// <div id='header-panel' className='header-panel text-center'>
 	//   <form className='panel-form'>
 	//     <input type='text' className='panel-input' placeholder='Title' />
@@ -25656,7 +24696,7 @@
 
 
 /***/ },
-/* 222 */
+/* 220 */
 /*!*********************************************!*\
   !*** ./app_react/components/posts/view.jsx ***!
   \*********************************************/
@@ -25665,29 +24705,34 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 3);
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 231);
-	var Post = __webpack_require__(/*! ./post.jsx */ 223);
-	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
+	var Reflux = __webpack_require__(/*! reflux */ 194);
 	
-	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 224);
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 221);
+	var Post = __webpack_require__(/*! ./post.jsx */ 222);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
+	
+	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 223);
 	
 	module.exports = React.createClass({displayName: "exports",
+	  mixins: [Reflux.ListenerMixin],
+	
 	  getInitialState: function() {
 	    return { data: [], loading: true };
 	  },
 	
 	  componentDidMount: function() {
+	    this.listenTo(PostStore, this._onChange);
 	    this.readPostsFromAPI();
 	  },
 	
 	  readPostsFromAPI: function() {
-	    var that = this;
-	    // use binding!
-	    actions.getPosts(function(posts){
-	      that.setState({
-	        data: posts,
-	        loading: false
-	      });
+	    actions.getPosts();
+	  },
+	
+	  _onChange: function(){
+	    this.setState({
+	      data: PostStore.posts(),
+	      loading: false
 	    });
 	  },
 	
@@ -25727,7 +24772,34 @@
 
 
 /***/ },
-/* 223 */
+/* 221 */
+/*!*********************************************!*\
+  !*** ./app_react/components/posts/list.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 3);
+	var Post = __webpack_require__(/*! ./post.jsx */ 222);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    var posts = this.props.data.map(function(post) {
+	      return (
+	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
+	      );
+	    });
+	
+	    return (
+	      React.createElement("ul", {className: "posts-list"}, 
+	        posts
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 222 */
 /*!*********************************************!*\
   !*** ./app_react/components/posts/post.jsx ***!
   \*********************************************/
@@ -25771,7 +24843,7 @@
 
 
 /***/ },
-/* 224 */
+/* 223 */
 /*!***************************************!*\
   !*** ./app_react/stores/PostStore.js ***!
   \***************************************/
@@ -25779,32 +24851,38 @@
 
 	'use strict';
 	
-	// ДОХУЯ у нас сторов!
-	
+	__webpack_require__(/*! whatwg-fetch */ 217);
 	var Reflux = __webpack_require__(/*! reflux */ 194);
-	var request = __webpack_require__(/*! superagent */ 217);
 	
-	var actions = __webpack_require__(/*! ../actions/actions */ 220);
+	var actions = __webpack_require__(/*! ../actions/actions */ 218);
+	
+	var posts = [];
 	
 	module.exports = Reflux.createStore({
 	  init: function() {
 	    this.listenTo(actions.getPosts, this.onGetPosts);
 	  },
 	
+	  posts: function(){
+	    return posts;
+	  },
+	
 	  onGetPosts: function(cb) {
-	    request.get('/v1/posts')
-	      .set('Accept', 'application/json')
-	      .end(function(error, res){
-	        if (res && !res.error){
-	          cb( JSON.parse(res.text) );
-	        };
-	      });
+	    fetch('/v1/posts')
+	      .then(function(response) {
+	        return response.json()
+	      }).then(function(data) {
+	        if ( !data.error ){
+	          posts = data;
+	          this.trigger();
+	        }
+	      }.bind(this));
 	  }
 	});
 
 
 /***/ },
-/* 225 */
+/* 224 */
 /*!***************************************************!*\
   !*** ./app_react/components/static/AboutPage.jsx ***!
   \***************************************************/
@@ -25813,60 +24891,35 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 3);
-	// var Reflux = require('reflux');
 	
-	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
-	// var StaticInformationStore = require('../../stores/StaticInformationStore');
+	var StaticInformationStore = __webpack_require__(/*! ../../stores/StaticInformationStore */ 225);
 	
+	function getStateFromStores() {
+	  return {
+	    about_text: StaticInformationStore.getAbout()
+	  };
+	}
 	
 	module.exports = React.createClass({displayName: "exports",
-	  // mixins: [Reflux.ListenerMixin],
 	
 	  getInitialState: function() {
-	    return {
-	      loading: true,
-	      about_text: ''
-	    };
+	    return getStateFromStores();
 	  },
-	
-	  // логично ли было бы это держать внутри React.createClass - если да - то как?
-	  // Какие функции надо держаит внутри а какие снаружи?
-	
-	  //------------------------
-	  // перенести к постам!
-	  // Что делать если апишка долго ничего не возвратила или вообще провалилась ? то какое действие логично?
-	  // 1-редирект
-	  // 2-сообщение об ошибке ( какое сообщение на примере страницы about )
-	  // Логичто было бы выдавать 404 типо страницы не существует - типо если недопустимый черт заходит и тут херакс....
-	  //------------------------
-	
 	
 	  componentDidMount: function() {
-	    // debugger;
-	    // this.listenTo(StaticInformationStore, this._onChange);
-	    var that = this;
-	    actions.getAbout(function(about_text){
-	      // debugger;
-	      // Бло криво как-то, через триггеры то лучше.
-	      that.setState({
-	        loading: false,
-	        about_text: about_text
-	      });
-	    }); // ???? правильно ли это ? если я сразу захочу получить инфу с сервера - как мне это сделать ?
+	    StaticInformationStore.listen(this._onChange);
+	    StaticInformationStore.fetchAbout();
 	  },
 	
-	  // _onChange: function(){
-	  //   debugger;
-	  //   // this.setState(  );
-	  // },
-	
+	  _onChange: function(){
+	    this.setState( getStateFromStores() );
+	  },
 	
 	  render: function() {
-	    // какого хуя не срабатывает?
-	    var Container = this.state.loading ? (
-	      React.createElement("div", {className: "preloader"})
-	    ) : (
+	    var Container = this.state.about_text ? (
 	      React.createElement("p", null,  this.state.about_text)
+	    ) : (
+	      React.createElement("div", {className: "preloader"})
 	    )
 	
 	    return (
@@ -25875,6 +24928,37 @@
 	         Container 
 	      )
 	    );
+	  }
+	});
+
+
+/***/ },
+/* 225 */
+/*!****************************************************!*\
+  !*** ./app_react/stores/StaticInformationStore.js ***!
+  \****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	__webpack_require__(/*! whatwg-fetch */ 217);
+	var Reflux = __webpack_require__(/*! reflux */ 194);
+	
+	var _aboutText = '';
+	
+	module.exports = Reflux.createStore({
+	  getAbout: function(){
+	    return _aboutText;
+	  },
+	
+	  fetchAbout: function(cb) {
+	    fetch('/v1/about')
+	      .then(function(response) {
+	        return response.json()
+	      }).then(function(data) {
+	        _aboutText = data.about_text;
+	        this.trigger();
+	      }.bind(this));
 	  }
 	});
 
@@ -25893,12 +24977,11 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 151).Navigation;
 	
-	// как правильно рекваирить ? ну типо с начала компоненты потом акшены потом сторы или как ? есть ли какой-то порядок ?
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216);
 	
 	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
 	
-	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
+	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
 	
 	function getStateFromStores() {
 	  return {
@@ -25922,46 +25005,23 @@
 	
 	    this.setState({ processing: true });
 	
-	    actions.login(email, password, function(loggedIn){
-	      // находиться ли оно в парвильном месте ?*????
-	      if (loggedIn){
-	        this.replaceWith('/about');
-	      }
-	
-	      if (!loggedIn){
-	        getStateFromStores(); // - НАХУЙ НАДО? ОН ВООБЩЕ НЕ ОТРАБАТЫВАЕТ ЕПТ!
-	        // this.replaceWith('/login'); // нам не нужет этот replace так как мы уже находимя на этой странце
-	
-	
-	        // ВОПРОС: Если бы мне тут понадобилось выставить не дефолтный стейт processing: false- а какой-то другой -
-	        // мне что нужно два раза просписывать setState...
-	      }
-	    }.bind(this));
-	
-	    // че за хуйня - почему тут?редиректа не будет если провалиться...
-	    // правильно держать во вьюхе вроде как = но не правильно делать редирект при ошибке валидации
-	    // логично это было бы делать в "LoginStore.listen" но блин там эта хрень реалирует на любое действие с locationStore...
-	    // не легче делать windows.location() ?
-	    // this.transitionTo('/');
+	    actions.login(email, password);
 	  },
 	
 	
 	  componentDidMount: function() {
-	    // debugger;
-	    // ---- Какой из этих методов следует юзать?
-	
-	    // var that = this; // remove that!
-	    // LoginStore.listen(function() {
-	    //   that._onChange();
-	    // })
-	
 	    this.listenTo(LoginStore, this._onChange);
 	  },
 	
-	  // И че - всегда так писать ? пздц какой-то
 	  _onChange: function(){
-	    // Этот метод дергается когда кто-то логиниться - какого хера - он не должен дергаться!!
-	    // тупо как-то.
+	    // TODO: тупо как-то а если три состояния - то метов onChange будет пиздец какой большой!!!
+	    if ( LoginStore.isLoggedIn() ){
+	      this.replaceWith('/about');
+	    } else {
+	      this.refs.email.getDOMNode().value = '';
+	      this.refs.password.getDOMNode().value = '';
+	    }
+	
 	    this.setState( getStateFromStores() );
 	  },
 	
@@ -25969,7 +25029,7 @@
 	    var FlashMessage = this.state.login_error_message ? (
 	      React.createElement("div", {className: "error login-error"},  this.state.login_error_message)
 	    ) : (
-	      React.createElement("div", null)
+	      null // !!! ничего не рендерим
 	    );
 	
 	    return (
@@ -26004,19 +25064,12 @@
 
 	'use strict';
 	
-	// - Нужно ли везде использовать 'use strict' или стоит один раз заюзать и будет норм.
-	// - МОЖЕТ НАХУЙ НАМ ВООБЩЕ РОУТЕР ?
-	// - Как компилить less в webpack?
-	// - узнать как работает WebPack - например на примере jsx что такое "test" ->? : /\.jsx$/, "loader" -> ?: 'jsx-loader'   -> 'css!sass' - че вот это зуйня значит * это типо html.erb? - типо шаблонизатор?
-	// - почему в ВебПаке и в Ноде некоторые плагины идут в package.json - а некоторые нужно руками ебошиьть - такие как gulp / extract-text-webpack-plugin
-	
 	var React = __webpack_require__(/*! react */ 3);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  render: function() {
-	    // на сколько нужно дробить компоненты? пока дробяться - дробить или по своим очучениям?
-	    // Как правильно дробить sign-in/sign up box with button and spinner? button отдельная компонента - и спиннер отдельная ? или это как сделал я сейчас?
-	    // все в одной компоненте?
+	
+	    // Сделать через hide/show - класс is-processing.
 	
 	    var SignButton = this.props.processing ? (
 	      React.createElement("button", {type: "submit", className: "button button-primary text-center"}, 
@@ -26053,14 +25106,16 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 151).Navigation;
 	
+	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216); // ПОЧЕМУ НЕ РАБОТАЕТ?
 	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 229);
-	var actions = __webpack_require__(/*! ../../actions/actions */ 220);
+	
+	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
 	
 	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
 	
 	function getStateFromStores() {
 	  return {
-	    signup_error_message: RegistrationStore.getSignupFlash(), // они должны быть разными ( login/signup ) ! - так как при переходе через формы будет сохраняться флеш месседж с другой формы
+	    signup_error_message: RegistrationStore.getSignupFlash(),
 	    processing: false
 	  };
 	}
@@ -26081,28 +25136,30 @@
 	
 	    this.setState({ processing: true });
 	
-	    actions.signUp(username, email, password, function(loggedIn){
-	      if (loggedIn){
-	        this.replaceWith('/about');
-	      }
-	
-	      if (!loggedIn){
-	        debugger;
-	        getStateFromStores();
-	      }
-	    }.bind(this));
+	    actions.signUp(username, email, password);
 	  },
 	
 	  componentDidMount: function() {
 	    this.listenTo(RegistrationStore, this._onChange);
+	    this.listenTo(LoginStore, this._onChange);
 	  },
 	
 	  _onChange: function(){
+	    // TODO: Дергаеться два раза - хуево
+	    // Дергаеться дважды - так как первая реация на unsuceess - и тогда не дергаеться loginStore
+	    // Если Succss мы еще и логинимся - и тогда пиздец - дергаеться второй store!
+	
+	    if ( LoginStore.isLoggedIn() ){
+	      this.replaceWith('/about');
+	    } else {
+	      getStateFromStores();
+	    }
+	
 	    this.setState( getStateFromStores() );
 	  },
 	
 	  render: function() {
-	    // дублирование кода!
+	    // дублирование кода! ( убрать )
 	    var FlashMessage = this.state.signup_error_message ? (
 	      React.createElement("div", {className: "error login-error"},  this.state.signup_error_message)
 	    ) : (
@@ -26145,10 +25202,10 @@
 
 	'use strict';
 	
+	__webpack_require__(/*! whatwg-fetch */ 217);
 	var Reflux = __webpack_require__(/*! reflux */ 194);
-	var request = __webpack_require__(/*! superagent */ 217);
 	
-	var actions = __webpack_require__(/*! ../actions/actions */ 220);
+	var actions = __webpack_require__(/*! ../actions/actions */ 218);
 	
 	
 	var _signupFlashMessage = '';
@@ -26164,40 +25221,45 @@
 	    return _signupFlashMessage;
 	  },
 	
-	  onSuccessSignUp: function(json_string_with_user){
-	    _signupFlashMessage = ''; // мб это как-то сделать в successLoggin?
-	    actions.successLoggin(json_string_with_user);
+	  onSuccessSignUp: function(userData){
+	    _signupFlashMessage = '';
+	    actions.successLoggin(userData);
+	
 	    this.trigger();
 	  },
 	
-	  onUnSuccessSignUp: function(json_string_with_error){
-	    debugger;
+	  onUnSuccessSignUp: function(errorMessage){
+	    _signupFlashMessage = errorMessage;
 	
-	    _signupFlashMessage = JSON.parse(json_string_with_error).error;
 	    this.trigger();
 	  },
 	
-	  onSignUp: function(username, email, password, cb) {
-	    request.post('/v1/signup')
-	      .send({ user: { user_name: username, email: email, password: password }})
-	      .set('Accept', 'application/json')
-	      .end(function(error, res){  // КАК тут юзнуть success? или другой коллбек? -  и нужно ли вообще?
+	  onSignUp: function(username, email, password) {
+	    fetch('/v1/signup', {
+	      method: 'post',
+	      headers: {
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json'
+	      },
+	      body: JSON.stringify({
+	        user: {
+	          user_name: username,
+	          email: email,
+	          password: password
+	        }
+	      })
+	    }).then( function(response) {
+	      return response.json()
+	    }).then(function(data) {
+	      debugger;
 	
-	        if (res && res.error){
-	          // МБ всю эту херь луче вынести в cb ( что этот метод делал только signup и никого не логинил )
-	          debugger; // ПОЧЕМУ "cb"-callback дергаеться раньше чем - "unSuccessSignUp" ?????????????????? ( Смотреть в Debugger-e )  || это типо второй экшен
-	          actions.unSuccessSignUp(res.text);
-	          cb(false);
-	          return;
-	        };
+	      if (data.error){
+	        return actions.unSuccessSignUp(data.error);
+	      }
 	
-	        if (res && !res.error){
-	          actions.successSignUp(res.text);
-	          cb(true);
-	          return;
-	        };
-	      });
-	  },
+	      actions.successSignUp(data);
+	    })
+	  }
 	});
 
 
@@ -26245,33 +25307,6 @@
 	
 		return to;
 	};
-
-
-/***/ },
-/* 231 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/list.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 3);
-	var Post = __webpack_require__(/*! ./post.jsx */ 223);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    var posts = this.props.data.map(function(post) {
-	      return (
-	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
-	      );
-	    });
-	
-	    return (
-	      React.createElement("ul", {className: "posts-list"}, 
-	        posts
-	      )
-	    );
-	  }
-	});
 
 
 /***/ }

@@ -1,24 +1,22 @@
 'use strict';
 
+require('whatwg-fetch');
 var Reflux = require('reflux');
-var request = require('superagent');
 
-var actions = require('../actions/actions');
+var _aboutText = '';
 
 module.exports = Reflux.createStore({
-  init: function() {
-    this.listenTo(actions.getAbout, this.onGetAbout);
+  getAbout: function(){
+    return _aboutText;
   },
 
-  onGetAbout: function(cb) {
-    request.get('/v1/about')
-      .set('Accept', 'application/json')
-      .end(function(error, res){
-        // кули у мнея error всегда пустой?
-        // нахуй прокидывать колбеки - если можно дернуть триггер ?
-        if (res && !res.error){ // можно ли тут юзнуть res.ok?
-          cb( JSON.parse(res.text).about_text );
-        };
-      });
+  fetchAbout: function(cb) {
+    fetch('/v1/about')
+      .then(function(response) {
+        return response.json()
+      }).then(function(data) {
+        _aboutText = data.about_text;
+        this.trigger();
+      }.bind(this));
   }
 });

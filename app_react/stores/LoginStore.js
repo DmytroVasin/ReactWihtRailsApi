@@ -1,14 +1,14 @@
 'use strict';
 
+require('whatwg-fetch');
 var Reflux = require('reflux');
-var request = require('superagent');
 
 var actions = require('../actions/actions');
 
 
 var _accessToken = sessionStorage.getItem('accessToken');
 var _email = sessionStorage.getItem('email');
-var _loginFlashMessage = ''; // Сама конструкция убогая - что за локальные переменные епта!
+var _loginFlashMessage = '';
 
 module.exports = Reflux.createStore({
   init: function() {
@@ -30,46 +30,45 @@ module.exports = Reflux.createStore({
     return _loginFlashMessage;
   },
 
-  onLogin: function(email, password, cb) {
-    request.post('/v1/login')
-      .send({ user: { email: email, password: password }})
-      .set('Accept', 'application/json')
-      .end(function(error, res){
-        // cb(res) - так правильно дергать коллбек?
+  onLogin: function(email, password) {
+    fetch('/v1/login', {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user: {
+          email: email,
+          password: password
+        }
+      })
+    }).then( function(response) {
+      return response.json() // TODO: Че за нах - почему именно так ( не очень важно но все же )
+    }).then(function(data) {
 
-        if (res && res.error){
-          actions.unSuccessLoggin(res.text);
-          cb(false);
-          return;
-        };
+      if (data.error){
+        return actions.unSuccessLoggin(data.error);
+      }
 
-        if (res && !res.error){ // можно ли тут юзнуть res.ok?
-          actions.successLoggin(res.text); // здесь тригериться еще одно событие - что бы можно было сделать this.trigger - это правильно?'
-          cb(true);
-          return;
-        };
-      });
+      actions.successLoggin(data);
+    })
   },
 
-  onSuccessLoggin: function(json_string_with_user){
-    var json = JSON.parse(json_string_with_user);
-    // Если слушает componentDidMount - и мне надо сделать редирект - нужно ли тригерить ?
-    // может ли STORE слушать другой STORE
-
-    _accessToken = json['access_token']
-    _email = json['email']
+  onSuccessLoggin: function(userData){
+    _accessToken = userData['access_token']
+    _email = userData['email']
 
     sessionStorage.setItem('accessToken', _accessToken);
     sessionStorage.setItem('email', _email);
     _loginFlashMessage = '';
 
-    // если я тут хочу вернуь json и какой-то статус а ниже....
-    this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно - какие параметры принимает и как на них реагирует ?
+    this.trigger();
   },
 
-  onUnSuccessLoggin: function(json_string_with_error){
-    _loginFlashMessage = JSON.parse(json_string_with_error).error;
-    // Как блин тут очистить форму?
+  onUnSuccessLoggin: function(errorMessage){
+    _loginFlashMessage = errorMessage;
+
     this.trigger();
   },
 
@@ -79,9 +78,6 @@ module.exports = Reflux.createStore({
 
     sessionStorage.removeItem('accessToken');
     sessionStorage.removeItem('email');
-    // а тут НАПРИМЕР хочу вернуть eror message  - как я их отличу в application.jsx по подписке
-    // тогда не понадобиться танцевать с установкой локальных переменных: _accessToken, _email
-    this.trigger(); // Куда это нахрен ИДЕТ!???? Куда именно
-    // типо он всегда будет дергать - LoginStore.listen(this._onChange)?
+    this.trigger();
   }
 });

@@ -1,4 +1,4 @@
-// npm install --save-dev extract-text-webpack-plugin
+// npm run build
 
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
