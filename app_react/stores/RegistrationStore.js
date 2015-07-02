@@ -49,8 +49,6 @@ module.exports = Reflux.createStore({
     }).then( function(response) {
       return response.json()
     }).then(function(data) {
-      debugger;
-
       if (data.error){
         return actions.unSuccessSignUp(data.error);
       }

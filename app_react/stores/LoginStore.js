@@ -44,7 +44,7 @@ module.exports = Reflux.createStore({
         }
       })
     }).then( function(response) {
-      return response.json() // TODO: Че за нах - почему именно так ( не очень важно но все же )
+      return response.json()
     }).then(function(data) {
 
       if (data.error){

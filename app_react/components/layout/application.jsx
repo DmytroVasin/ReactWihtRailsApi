@@ -23,11 +23,6 @@ module.exports = React.createClass({
   },
 
   componentDidMount: function() {
-    // ---- >>>> Юзать!
-    // var that = this; // remove that!
-    // LoginStore.listen(function() {
-    //   that._onChange();
-    // })
     this.listenTo(LoginStore, this._onChange);
   },
 

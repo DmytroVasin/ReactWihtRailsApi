@@ -8,6 +8,7 @@ var Navigation = require('react-router').Navigation;
 var LoginStore = require('../../stores/LoginStore');
 
 var SignButton = require('../shared/SignButton.jsx');
+var FlashMessage = require('../shared/FlashMessage.jsx');
 
 var actions = require('../../actions/actions');
 
@@ -54,12 +55,6 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    var FlashMessage = this.state.login_error_message ? (
-      <div className='error login-error'>{ this.state.login_error_message }</div>
-    ) : (
-      null // !!! ничего не рендерим
-    );
-
     return (
       <div className='login md-modal'>
         <form className='login-form' onSubmit={this._onSubmit}>
@@ -76,7 +71,7 @@ module.exports = React.createClass({
           <SignButton processing={this.state.processing} button_text='Sign In' />
         </form>
 
-        { FlashMessage }
+        <FlashMessage errorMessage = {this.state.login_error_message} />
       </div>
     );
   }

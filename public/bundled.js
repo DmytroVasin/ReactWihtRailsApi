@@ -19379,7 +19379,7 @@
 	
 	var Router = __webpack_require__(/*! react-router */ 151);
 	var routes = __webpack_require__(/*! ../routes.jsx */ 192);
-	var assign = __webpack_require__(/*! object-assign */ 230);
+	var assign = __webpack_require__(/*! object-assign */ 231);
 	
 	
 	var router = Router.create(routes, Router.HistoryLocation)
@@ -22509,7 +22509,7 @@
 	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 220);
 	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 224);
 	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 226);
-	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 228);
+	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 229);
 	
 	
 	module.exports = (
@@ -22554,11 +22554,6 @@
 	  },
 	
 	  componentDidMount: function() {
-	    // ---- >>>> Юзать!
-	    // var that = this; // remove that!
-	    // LoginStore.listen(function() {
-	    //   that._onChange();
-	    // })
 	    this.listenTo(LoginStore, this._onChange);
 	  },
 	
@@ -24209,7 +24204,7 @@
 	        }
 	      })
 	    }).then( function(response) {
-	      return response.json() // TODO: Че за нах - почему именно так ( не очень важно но все же )
+	      return response.json()
 	    }).then(function(data) {
 	
 	      if (data.error){
@@ -24707,8 +24702,8 @@
 	var React = __webpack_require__(/*! react */ 3);
 	var Reflux = __webpack_require__(/*! reflux */ 194);
 	
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 221);
-	var Post = __webpack_require__(/*! ./post.jsx */ 222);
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 222);
+	var Post = __webpack_require__(/*! ./post.jsx */ 221);
 	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
 	
 	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 223);
@@ -24721,6 +24716,11 @@
 	  },
 	
 	  componentDidMount: function() {
+	    // TODO: Разве это норм подход? один колбек решил бы все проблемы
+	    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
+	    // в сторе создаем отдельную локальную переменную/геттер
+	    // добавляем onChange...
+	
 	    this.listenTo(PostStore, this._onChange);
 	    this.readPostsFromAPI();
 	  },
@@ -24774,33 +24774,6 @@
 /***/ },
 /* 221 */
 /*!*********************************************!*\
-  !*** ./app_react/components/posts/list.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 3);
-	var Post = __webpack_require__(/*! ./post.jsx */ 222);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    var posts = this.props.data.map(function(post) {
-	      return (
-	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
-	      );
-	    });
-	
-	    return (
-	      React.createElement("ul", {className: "posts-list"}, 
-	        posts
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 222 */
-/*!*********************************************!*\
   !*** ./app_react/components/posts/post.jsx ***!
   \*********************************************/
 /***/ function(module, exports, __webpack_require__) {
@@ -24836,6 +24809,33 @@
 	            )
 	          )
 	        )
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 222 */
+/*!*********************************************!*\
+  !*** ./app_react/components/posts/list.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 3);
+	var Post = __webpack_require__(/*! ./post.jsx */ 221);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    var posts = this.props.data.map(function(post) {
+	      return (
+	        React.createElement(Post, {key: post.id, title: post.title, body: post.body, url: post.url})
+	      );
+	    });
+	
+	    return (
+	      React.createElement("ul", {className: "posts-list"}, 
+	        posts
 	      )
 	    );
 	  }
@@ -24980,6 +24980,7 @@
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216);
 	
 	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
+	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 228);
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
 	
@@ -25026,12 +25027,6 @@
 	  },
 	
 	  render: function() {
-	    var FlashMessage = this.state.login_error_message ? (
-	      React.createElement("div", {className: "error login-error"},  this.state.login_error_message)
-	    ) : (
-	      null // !!! ничего не рендерим
-	    );
-	
 	    return (
 	      React.createElement("div", {className: "login md-modal"}, 
 	        React.createElement("form", {className: "login-form", onSubmit: this._onSubmit}, 
@@ -25048,7 +25043,7 @@
 	          React.createElement(SignButton, {processing: this.state.processing, button_text: "Sign In"})
 	        ), 
 	
-	         FlashMessage 
+	        React.createElement(FlashMessage, {errorMessage: this.state.login_error_message})
 	      )
 	    );
 	  }
@@ -25094,6 +25089,33 @@
 
 /***/ },
 /* 228 */
+/*!******************************************************!*\
+  !*** ./app_react/components/shared/FlashMessage.jsx ***!
+  \******************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 3);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	
+	    var flashMessage = this.props.errorMessage ? (
+	      React.createElement("div", {className: "error login-error"},  this.props.errorMessage)
+	    ) : (
+	      null // TODO: где-то читал что реакт.jsx должен возвращать <div> элемент! - но тут я никуя не возвращаю! - кули работает?
+	    );
+	
+	    return (
+	      flashMessage
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 229 */
 /*!***********************************************************!*\
   !*** ./app_react/components/registrations/SignUpPage.jsx ***!
   \***********************************************************/
@@ -25106,12 +25128,13 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 151).Navigation;
 	
-	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216); // ПОЧЕМУ НЕ РАБОТАЕТ?
-	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 229);
+	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 216); // TODO: ПОЧЕМУ НЕ РАБОТАЕТ? - надо вешать два листенера!
+	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 230);
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 218);
 	
 	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 227);
+	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 228);
 	
 	function getStateFromStores() {
 	  return {
@@ -25159,13 +25182,6 @@
 	  },
 	
 	  render: function() {
-	    // дублирование кода! ( убрать )
-	    var FlashMessage = this.state.signup_error_message ? (
-	      React.createElement("div", {className: "error login-error"},  this.state.signup_error_message)
-	    ) : (
-	      React.createElement("div", null)
-	    );
-	
 	    return (
 	      React.createElement("div", {className: "login md-modal"}, 
 	        React.createElement("form", {className: "login-form", onSubmit: this._onSubmit}, 
@@ -25186,7 +25202,7 @@
 	          React.createElement(SignButton, {processing: this.state.processing, button_text: "Register"})
 	        ), 
 	
-	         FlashMessage 
+	        React.createElement(FlashMessage, {errorMessage: this.state.signup_error_message})
 	      )
 	    );
 	  }
@@ -25194,7 +25210,7 @@
 
 
 /***/ },
-/* 229 */
+/* 230 */
 /*!***********************************************!*\
   !*** ./app_react/stores/RegistrationStore.js ***!
   \***********************************************/
@@ -25251,8 +25267,6 @@
 	    }).then( function(response) {
 	      return response.json()
 	    }).then(function(data) {
-	      debugger;
-	
 	      if (data.error){
 	        return actions.unSuccessSignUp(data.error);
 	      }
@@ -25264,7 +25278,7 @@
 
 
 /***/ },
-/* 230 */
+/* 231 */
 /*!**********************************!*\
   !*** ./~/object-assign/index.js ***!
   \**********************************/

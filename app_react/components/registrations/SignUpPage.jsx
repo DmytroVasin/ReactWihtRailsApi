@@ -11,6 +11,7 @@ var RegistrationStore = require('../../stores/RegistrationStore');
 var actions = require('../../actions/actions');
 
 var SignButton = require('../shared/SignButton.jsx');
+var FlashMessage = require('../shared/FlashMessage.jsx');
 
 function getStateFromStores() {
   return {
@@ -58,13 +59,6 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    // дублирование кода! ( убрать )
-    var FlashMessage = this.state.signup_error_message ? (
-      <div className='error login-error'>{ this.state.signup_error_message }</div>
-    ) : (
-      <div></div>
-    );
-
     return (
       <div className='login md-modal'>
         <form className='login-form' onSubmit={this._onSubmit}>
@@ -85,7 +79,7 @@ module.exports = React.createClass({
           <SignButton processing={this.state.processing} button_text='Register' />
         </form>
 
-        { FlashMessage }
+        <FlashMessage errorMessage = {this.state.signup_error_message} />
       </div>
     );
   }
