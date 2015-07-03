@@ -10,6 +10,8 @@ class User < ActiveRecord::Base
 
   validates :username, presence: true
 
+  has_many :posts
+
   private
   def update_access_token!
     self.access_token = "#{self.id}:#{Devise.friendly_token}"

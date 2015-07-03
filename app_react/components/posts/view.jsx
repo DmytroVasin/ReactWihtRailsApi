@@ -3,6 +3,8 @@
 var React = require('react');
 var Reflux = require('reflux');
 
+var Navigation = require('react-router').Navigation;
+
 var PostsList = require('./list.jsx');
 var Post = require('./post.jsx');
 var actions = require('../../actions/actions');
@@ -10,7 +12,7 @@ var actions = require('../../actions/actions');
 var PostStore = require('../../stores/PostStore');
 
 module.exports = React.createClass({
-  mixins: [Reflux.ListenerMixin],
+  mixins: [Reflux.ListenerMixin, Navigation],
 
   getInitialState: function() {
     return { data: [], loading: true };
@@ -27,6 +29,11 @@ module.exports = React.createClass({
   },
 
   _onChange: function(){
+    if ( PostStore.getCreatePostFlash() ){
+      // debugger;
+      this.replaceWith('/login');
+    };
+
     this.setState({
       data: PostStore.posts(),
       loading: false

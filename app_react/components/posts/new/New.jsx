@@ -5,12 +5,13 @@ var Reflux = require('reflux');
 
 var Navigation = require('react-router').Navigation;
 
-var PostStore = require('../../stores/PostStore');
+var PostStore = require('../../../stores/PostStore');
+var LoginStore = require('../../../stores/LoginStore');
 
-var SignButton = require('../shared/SignButton.jsx');
-var FlashMessage = require('../shared/FlashMessage.jsx');
+var SignButton = require('../../shared/SignButton.jsx');
+var FlashMessage = require('../../shared/FlashMessage.jsx');
 
-var actions = require('../../actions/actions');
+var actions = require('../../../actions/actions');
 
 function getStateFromStores() {
   return {
@@ -23,6 +24,9 @@ module.exports = React.createClass({
   mixins: [Reflux.ListenerMixin, Navigation],
 
   getInitialState: function() {
+    // TODO: Где я должен ставить редирект? мб в роутах как-то?
+    if ( LoginStore.isLoggedIn() ){} else { this.replaceWith('/login'); }
+
     return getStateFromStores();
   },
 
@@ -39,6 +43,9 @@ module.exports = React.createClass({
 
 
   componentDidMount: function() {
+    this.listenTo(LoginStore, this._onChange); // TODO: СХЕРАЛИ если я убираю эту строчку - я не могу обращаться к Стору???
+    // Как сделать обращение к стору без навешивания onChange?
+
     this.listenTo(PostStore, this._onChange);
   },
 

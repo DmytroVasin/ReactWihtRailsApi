@@ -1,9 +1,9 @@
 module V1
   class PostsController < ApplicationController
-    skip_before_action :authenticate_user_from_token!
+    before_action :authenticate_user_from_token!
 
     def index
-      posts = Post.all
+      posts = Post.includes(:user).all
 
       sleep 1
 
@@ -23,8 +23,7 @@ module V1
     end
 
     def create
-      # TODO: CURRENT USER! Should be used!
-      @post = Post.new(post_params)
+      @post = Post.new( post_params.merge({ user: current_user }) )
 
       if @post.save
         render json: @post, serializer: PostSerializer, root: nil

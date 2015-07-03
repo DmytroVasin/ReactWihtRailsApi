@@ -10,8 +10,8 @@ var AboutPage = require('./components/static/AboutPage.jsx');
 var LoginPage = require('./components/session/LoginPage.jsx');
 var SignUpPage = require('./components/registrations/SignUpPage.jsx');
 
-var PostsNew = require('./components/posts/New.jsx');
-var PostShow = require('./components/posts/Show.jsx');
+var PostsNew = require('./components/posts/new/New.jsx');
+var PostShow = require('./components/posts/show/Show.jsx');
 
 
 module.exports = (

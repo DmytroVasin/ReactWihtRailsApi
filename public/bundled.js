@@ -24188,8 +24188,8 @@
 	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 233);
 	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 236);
 	
-	var PostsNew = __webpack_require__(/*! ./components/posts/New.jsx */ 238);
-	var PostShow = __webpack_require__(/*! ./components/posts/Show.jsx */ 239);
+	var PostsNew = __webpack_require__(/*! ./components/posts/new/New.jsx */ 238);
+	var PostShow = __webpack_require__(/*! ./components/posts/show/Show.jsx */ 239);
 	
 	
 	module.exports = (
@@ -26326,6 +26326,8 @@
 	
 	  logout: function() {
 	    actions.logout();
+	    // TODO: Как сделать редирект после разлогинивания?
+	    // обычно бы повесился на тригер события - но это тупо - тут колбеком подойдет как пить дать!
 	  },
 	
 	  render: function() {
@@ -26382,14 +26384,16 @@
 	var React = __webpack_require__(/*! react */ 3);
 	var Reflux = __webpack_require__(/*! reflux */ 201);
 	
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 229);
-	var Post = __webpack_require__(/*! ./post.jsx */ 228);
+	var Navigation = __webpack_require__(/*! react-router */ 160).Navigation;
+	
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 228);
+	var Post = __webpack_require__(/*! ./post.jsx */ 229);
 	var actions = __webpack_require__(/*! ../../actions/actions */ 225);
 	
 	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 230);
 	
 	module.exports = React.createClass({displayName: "exports",
-	  mixins: [Reflux.ListenerMixin],
+	  mixins: [Reflux.ListenerMixin, Navigation],
 	
 	  getInitialState: function() {
 	    return { data: [], loading: true };
@@ -26406,6 +26410,11 @@
 	  },
 	
 	  _onChange: function(){
+	    if ( PostStore.getCreatePostFlash() ){
+	      // debugger;
+	      this.replaceWith('/login');
+	    };
+	
 	    this.setState({
 	      data: PostStore.posts(),
 	      loading: false
@@ -26450,6 +26459,33 @@
 /***/ },
 /* 228 */
 /*!*********************************************!*\
+  !*** ./app_react/components/posts/list.jsx ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 3);
+	var Post = __webpack_require__(/*! ./post.jsx */ 229);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    var posts = this.props.data.map(function(post) {
+	      return (
+	        React.createElement(Post, {key: post.id, id: post.id, title: post.title, body: post.body, url: post.url, author_name: post.author_name})
+	      );
+	    });
+	
+	    return (
+	      React.createElement("ul", {className: "posts-list"}, 
+	        posts
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 229 */
+/*!*********************************************!*\
   !*** ./app_react/components/posts/post.jsx ***!
   \*********************************************/
 /***/ function(module, exports, __webpack_require__) {
@@ -26477,7 +26513,7 @@
 	              )
 	            ), 
 	            React.createElement("span", {className: "post-info-item"}, 
-	              React.createElement("a", {href: "#"}, "echenley")
+	              React.createElement("a", {href: "#"}, this.props.author_name)
 	            ), 
 	            React.createElement("span", {className: "post-info-item"}, "6 months ago"), 
 	            React.createElement("span", {className: "post-info-item"}, 
@@ -26492,33 +26528,6 @@
 	// TODO: Как заюзать, WTF?
 	//<Link to='post_show' className='post-title'>Sign In</Link>
 	// Хули круд такой тяжелый ?
-
-
-/***/ },
-/* 229 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/list.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 3);
-	var Post = __webpack_require__(/*! ./post.jsx */ 228);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    var posts = this.props.data.map(function(post) {
-	      return (
-	        React.createElement(Post, {key: post.id, id: post.id, title: post.title, body: post.body, url: post.url})
-	      );
-	    });
-	
-	    return (
-	      React.createElement("ul", {className: "posts-list"}, 
-	        posts
-	      )
-	    );
-	  }
-	});
 
 
 /***/ },
@@ -26570,8 +26579,11 @@
 	  },
 	
 	  onGetPost: function(id) {
-	    fetch('/v1/posts/'+id)
-	      .then(function(response) {
+	    fetch('/v1/posts/'+id, {
+	        headers: {
+	          'Authorization': sessionStorage.getItem('accessToken')
+	        }
+	      }).then(function(response) {
 	        return response.json()
 	      }).then(function(data) {
 	        if ( !data.error ){
@@ -26582,14 +26594,20 @@
 	  },
 	
 	  onGetPosts: function() {
-	    fetch('/v1/posts')
-	      .then(function(response) {
+	    fetch('/v1/posts', {
+	      headers: {
+	        'Authorization': sessionStorage.getItem('accessToken')
+	      }
+	    }).then(function(response) {
 	        return response.json()
 	      }).then(function(data) {
-	        if ( !data.error ){
+	        if ( data.error ){
+	          _createPostFlashMessage = data.error;
+	        } else {
 	          _posts = data;
-	          this.trigger();
 	        }
+	
+	        this.trigger();
 	      }.bind(this));
 	  },
 	
@@ -26598,7 +26616,8 @@
 	      method: 'post',
 	      headers: {
 	        'Accept': 'application/json',
-	        'Content-Type': 'application/json'
+	        'Content-Type': 'application/json',
+	        'Authorization': sessionStorage.getItem('accessToken')
 	      },
 	      body: JSON.stringify({
 	        post: {
@@ -27030,9 +27049,9 @@
 
 /***/ },
 /* 238 */
-/*!********************************************!*\
-  !*** ./app_react/components/posts/New.jsx ***!
-  \********************************************/
+/*!************************************************!*\
+  !*** ./app_react/components/posts/new/New.jsx ***!
+  \************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27042,12 +27061,13 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 160).Navigation;
 	
-	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 230);
+	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 230);
+	var LoginStore = __webpack_require__(/*! ../../../stores/LoginStore */ 223);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 234);
-	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 235);
+	var SignButton = __webpack_require__(/*! ../../shared/SignButton.jsx */ 234);
+	var FlashMessage = __webpack_require__(/*! ../../shared/FlashMessage.jsx */ 235);
 	
-	var actions = __webpack_require__(/*! ../../actions/actions */ 225);
+	var actions = __webpack_require__(/*! ../../../actions/actions */ 225);
 	
 	function getStateFromStores() {
 	  return {
@@ -27060,6 +27080,9 @@
 	  mixins: [Reflux.ListenerMixin, Navigation],
 	
 	  getInitialState: function() {
+	    // TODO: Где я должен ставить редирект? мб в роутах как-то?
+	    if ( LoginStore.isLoggedIn() ){} else { this.replaceWith('/login'); }
+	
 	    return getStateFromStores();
 	  },
 	
@@ -27076,6 +27099,9 @@
 	
 	
 	  componentDidMount: function() {
+	    this.listenTo(LoginStore, this._onChange); // TODO: СХЕРАЛИ если я убираю эту строчку - я не могу обращаться к Стору???
+	    // Как сделать обращение к стору без навешивания onChange?
+	
 	    this.listenTo(PostStore, this._onChange);
 	  },
 	
@@ -27121,9 +27147,9 @@
 
 /***/ },
 /* 239 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/Show.jsx ***!
-  \*********************************************/
+/*!**************************************************!*\
+  !*** ./app_react/components/posts/show/Show.jsx ***!
+  \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27131,9 +27157,9 @@
 	var React = __webpack_require__(/*! react */ 3);
 	var Reflux = __webpack_require__(/*! reflux */ 201);
 	
-	var actions = __webpack_require__(/*! ../../actions/actions */ 225);
+	var actions = __webpack_require__(/*! ../../../actions/actions */ 225);
 	
-	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 230);
+	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 230);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  mixins: [Reflux.ListenerMixin],
@@ -27202,7 +27228,6 @@
 	        )
 	      )
 	    )
-	
 	
 	    return (
 	      React.createElement("div", {className: "content full-width"}, 

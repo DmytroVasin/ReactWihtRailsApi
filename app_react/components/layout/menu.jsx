@@ -15,6 +15,8 @@ module.exports = React.createClass({
 
   logout: function() {
     actions.logout();
+    // TODO: Как сделать редирект после разлогинивания?
+    // обычно бы повесился на тригер события - но это тупо - тут колбеком подойдет как пить дать!
   },
 
   render: function() {

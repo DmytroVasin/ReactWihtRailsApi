@@ -3,9 +3,9 @@
 var React = require('react');
 var Reflux = require('reflux');
 
-var actions = require('../../actions/actions');
+var actions = require('../../../actions/actions');
 
-var PostStore = require('../../stores/PostStore');
+var PostStore = require('../../../stores/PostStore');
 
 module.exports = React.createClass({
   mixins: [Reflux.ListenerMixin],
@@ -74,7 +74,6 @@ module.exports = React.createClass({
         </div>
       </div>
     )
-
 
     return (
       <div className='content full-width'>

@@ -40,8 +40,11 @@ module.exports = Reflux.createStore({
   },
 
   onGetPost: function(id) {
-    fetch('/v1/posts/'+id)
-      .then(function(response) {
+    fetch('/v1/posts/'+id, {
+        headers: {
+          'Authorization': sessionStorage.getItem('accessToken')
+        }
+      }).then(function(response) {
         return response.json()
       }).then(function(data) {
         if ( !data.error ){
@@ -52,14 +55,20 @@ module.exports = Reflux.createStore({
   },
 
   onGetPosts: function() {
-    fetch('/v1/posts')
-      .then(function(response) {
+    fetch('/v1/posts', {
+      headers: {
+        'Authorization': sessionStorage.getItem('accessToken')
+      }
+    }).then(function(response) {
         return response.json()
       }).then(function(data) {
-        if ( !data.error ){
+        if ( data.error ){
+          _createPostFlashMessage = data.error;
+        } else {
           _posts = data;
-          this.trigger();
         }
+
+        this.trigger();
       }.bind(this));
   },
 
@@ -68,7 +77,8 @@ module.exports = Reflux.createStore({
       method: 'post',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': sessionStorage.getItem('accessToken')
       },
       body: JSON.stringify({
         post: {

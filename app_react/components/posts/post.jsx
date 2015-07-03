@@ -21,7 +21,7 @@ module.exports = React.createClass({
               </i>
             </a>
             <span className='post-info-item'>
-              <a href='#'>echenley</a>
+              <a href='#'>{this.props.author_name}</a>
             </span>
             <span className='post-info-item'>6 months ago</span>
             <span className='post-info-item'>
