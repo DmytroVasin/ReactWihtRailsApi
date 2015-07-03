@@ -722,9 +722,9 @@ textarea {
   .panel-toggle:after {
     transform: rotate(0); }
   .panel-open .panel-toggle:before {
-    transform: rotate(135deg); }
+    transform: rotate(0deg); }
   .panel-open .panel-toggle:after {
-    transform: rotate(45deg); }
+    transform: rotate(90deg); }
 
 .header-title {
   padding: 0.5rem 2rem; }
@@ -869,10 +869,12 @@ textarea {
 
 /* Login/Registration
 ====================================== */
-.login {
+.login,
+.new-post {
   padding: 1rem 2rem 2rem 2rem; }
 
-.login-form {
+.login-form,
+.new-post-form {
   display: inline-block; }
 
 .login-error {

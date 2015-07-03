@@ -14,5 +14,11 @@ module.exports = Reflux.createActions([
 
     // static pages
     'getAbout',
-    'getPosts'
+    'getPosts',
+
+    // posts
+    'getPost',
+    'createNewPost',
+    'successCreatePost',
+    'unSuccessCreatePost'
 ]);

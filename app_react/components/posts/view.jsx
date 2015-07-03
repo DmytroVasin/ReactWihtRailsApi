@@ -23,10 +23,6 @@ module.exports = React.createClass({
     // добавляем onChange...
 
     this.listenTo(PostStore, this._onChange);
-    this.readPostsFromAPI();
-  },
-
-  readPostsFromAPI: function() {
     actions.getPosts();
   },
 

@@ -493,8 +493,8 @@ textarea {
     &:after { transform: rotate(0); }
 
     .panel-open & {
-        &:before { transform: rotate(135deg); }
-        &:after { transform: rotate(45deg); }
+        &:before { transform: rotate(0deg); }
+        &:after { transform: rotate(90deg); }
     }
 }
 
@@ -694,17 +694,18 @@ textarea {
 
 /* Login/Registration
 ====================================== */
-
-.login {
+.login,
+.new-post {
   padding: $small $medium $medium $medium;
 }
 
-.login-form {
+.login-form,
+.new-post-form {
   display: inline-block;
 }
 
 .login-error {
-    margin-top: $small;
+  margin-top: $small;
 }
 
 .md-modal {

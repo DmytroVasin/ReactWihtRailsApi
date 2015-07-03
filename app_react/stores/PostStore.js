@@ -5,26 +5,98 @@ var Reflux = require('reflux');
 
 var actions = require('../actions/actions');
 
-var posts = [];
+var _posts = [];
+var _createPostFlashMessage = '';
+var _newPost = null;
+var _currentPost = null;
 
 module.exports = Reflux.createStore({
   init: function() {
+    this.listenTo(actions.getPost, this.onGetPost);
     this.listenTo(actions.getPosts, this.onGetPosts);
+    this.listenTo(actions.createNewPost, this.onCreateNewPost);
+    this.listenTo(actions.successCreatePost, this.onSuccessCreatePost);
+    this.listenTo(actions.unSuccessCreatePost, this.onUnSuccessCreatePost);
+  },
+
+  getCreatePostFlash: function(){
+    return _createPostFlashMessage;
+  },
+
+  getNewPost: function(){
+    return _newPost;
+  },
+
+  setNewPost: function(value){
+    _newPost = value;
   },
 
   posts: function(){
-    return posts;
+    return _posts;
   },
 
-  onGetPosts: function(cb) {
+  currentPost: function(){
+    return _currentPost;
+  },
+
+  onGetPost: function(id) {
+    fetch('/v1/posts/'+id)
+      .then(function(response) {
+        return response.json()
+      }).then(function(data) {
+        if ( !data.error ){
+          _currentPost = data;
+          this.trigger();
+        }
+      }.bind(this));
+  },
+
+  onGetPosts: function() {
     fetch('/v1/posts')
       .then(function(response) {
         return response.json()
       }).then(function(data) {
         if ( !data.error ){
-          posts = data;
+          _posts = data;
           this.trigger();
         }
       }.bind(this));
+  },
+
+  onCreateNewPost: function(title, url) {
+    fetch('/v1/posts', {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        post: {
+          title: title,
+          url: url
+        }
+      })
+    }).then( function(response) {
+      return response.json()
+    }).then(function(data) {
+
+      if (data.error){
+        return actions.unSuccessCreatePost(data.error);
+      }
+
+      actions.successCreatePost(data);
+    })
+  },
+
+  onSuccessCreatePost: function(newPost){
+    // TODO: Правильный ли это подход для создания поста? - ебота какая-то получается? - слишком много движения для CRUD действий
+    _createPostFlashMessage = '';
+    _newPost = newPost;
+    this.trigger();
+  },
+
+  onUnSuccessCreatePost: function(errorMessage){
+    _createPostFlashMessage = errorMessage;
+    this.trigger();
   }
-});
+})

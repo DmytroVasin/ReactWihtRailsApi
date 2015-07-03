@@ -5,7 +5,7 @@ module.exports = React.createClass({
     return (
       <div className='post cf'>
         <div className='post-link'>
-          <a className='post-title'>{ this.props.title }</a>
+          <a href={'#/posts/'+this.props.id } className='post-title'>{ this.props.title }</a>
           <span className='hostname'>
             <span>(</span>
             <a href='#'>{ this.props.url }</a>
@@ -33,3 +33,6 @@ module.exports = React.createClass({
     );
   }
 });
+// TODO: Как заюзать, WTF?
+//<Link to='post_show' className='post-title'>Sign In</Link>
+// Хули круд такой тяжелый ?

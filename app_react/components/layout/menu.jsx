@@ -26,9 +26,10 @@ module.exports = React.createClass({
         <span>
           <a className='register-link' onClick={this.logout}>LogOut</a>
         </span>
-        <a id='panel-toggle' className='panel-toggle'>
+
+        <Link to='post_new' className='panel-toggle'>
           <span className='sr-only'>Add Post</span>
-        </a>
+        </Link>
       </div>
     ) : (
       <div className='float-right'>
@@ -56,12 +57,3 @@ module.exports = React.createClass({
     );
   }
 });
-
-// HEADER ( Скрытый хеадер )
-// <div id='header-panel' className='header-panel text-center'>
-//   <form className='panel-form'>
-//     <input type='text' className='panel-input' placeholder='Title' />
-//     <input type='url' className='panel-input' placeholder='Link' />
-//     <button type='submit' className='button panel-button button-outline'>Submit</button>
-//   </form>
-// </div>
