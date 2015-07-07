@@ -1,5 +1,7 @@
 class ApplicationController < ActionController::API
   include AbstractController::Translation # WTF ? - походу эта пердота добавляет t('') метод - трансляции
+  include ActionController::ImplicitRender # WTF - Since rails-api is stripped down version of rails some functionalities are missing (in this case implicit rendaring of views) and we need to add them explicitly.
+
   before_action :authenticate_user_from_token!
 
   respond_to :json
@@ -7,6 +9,7 @@ class ApplicationController < ActionController::API
   # User Authentication
   # Authenticates the user with OAuth2 Resource Owner Password Credentials Grant
   def authenticate_user_from_token!
+
     auth_token = request.headers['Authorization'] # Кто добавляет эту хню?
 
     if auth_token  # дублируеться код с registrtaion controller.

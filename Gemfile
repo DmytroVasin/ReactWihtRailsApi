@@ -11,7 +11,8 @@ gem 'rails-api', '~> 0.4.0'
 # ?
 
 gem 'devise'
-gem 'active_model_serializers', github: 'rails-api/active_model_serializers', branch: '0-10-stable'
+gem 'jbuilder'
+gem 'kaminari'
 
 group :development, :test do
   gem 'spring'

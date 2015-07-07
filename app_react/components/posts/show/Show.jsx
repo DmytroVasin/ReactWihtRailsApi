@@ -64,7 +64,7 @@ module.exports = React.createClass({
               </i>
             </a>
             <span className='post-info-item'>
-              <a href='#'>echenley</a>
+              <a href='#'>{ this.state.data.author_name }</a>
             </span>
             <span className='post-info-item'>{ this.state.data.strf_created_at }</span>
             <span className='post-info-item'>

@@ -50,11 +50,11 @@ module.exports = React.createClass({
   },
 
   _onChange: function(){
-    var newPost = PostStore.getNewPost()
+    var newPostId = PostStore.getNewPostId()
 
-    if( PostStore.getNewPost() ){
-      PostStore.setNewPost = null;
-      this.replaceWith('/posts/' + newPost.id);
+    if( newPostId ){
+      PostStore.setNewPostId = null;
+      this.replaceWith('/posts/' + newPostId);
     } else {
       this.refs.title.getDOMNode().value = '';
       this.refs.url.getDOMNode().value = '';

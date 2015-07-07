@@ -3,11 +3,7 @@ module V1
     before_action :authenticate_user_from_token!
 
     def index
-      posts = Post.includes(:user).all
-
-      sleep 1
-
-      render json: posts, each_serializer: PostSerializer
+      @posts = Post.includes(:user, :comments).page( params['page'] ).per(4)
     end
 
     def show
@@ -15,7 +11,8 @@ module V1
       @post = Post.find(params[:id])
 
       if @post
-        render json: @post, serializer: PostSerializer, root: nil
+        # render json: @post, serializer: PostSerializer, root: nil
+        # We use there jBuilder.
       else
         # TODO: CHECK MORE DEEPLY
         render json: { error: 'Not Found'}, status: 401
@@ -26,8 +23,9 @@ module V1
       @post = Post.new( post_params.merge({ user: current_user }) )
 
       if @post.save
-        render json: @post, serializer: PostSerializer, root: nil
+        # We use there jBuilder.
       else
+        # TODO: CHECK MORE DEEPLY
         render json: { error: @post.errors.full_messages.join(', ') }, status: :unprocessable_entity
       end
 

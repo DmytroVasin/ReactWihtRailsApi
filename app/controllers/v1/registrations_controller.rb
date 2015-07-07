@@ -30,6 +30,7 @@ module V1
 
     private
     def check_if_user_login
+      # TODO: Тоже якась херь
       auth_token = request.headers['Authorization']
 
       if auth_token

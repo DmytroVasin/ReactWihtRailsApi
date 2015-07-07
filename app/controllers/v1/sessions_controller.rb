@@ -12,7 +12,6 @@ module V1
 
       if @user.valid_password?(params[:user][:password])
         sign_in :user, @user
-        render json: @user, serializer: SessionSerializer, root: nil
       else
         invalid_login_attempt
       end
@@ -21,7 +20,7 @@ module V1
     private
 
     def invalid_login_attempt
-      warden.custom_failure!
+      warden.custom_failure! # WTF - what is that ???
       render json: { error: t('sessions_controller.invalid_login_attempt') }, status: :unprocessable_entity
     end
 

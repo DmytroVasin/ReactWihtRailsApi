@@ -24183,18 +24183,18 @@
 	
 	
 	var App = __webpack_require__(/*! ./components/layout/application.jsx */ 200);
-	var PostsView = __webpack_require__(/*! ./components/posts/view.jsx */ 227);
-	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 231);
-	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 233);
-	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 236);
+	var AboutPage = __webpack_require__(/*! ./components/static/AboutPage.jsx */ 227);
+	var LoginPage = __webpack_require__(/*! ./components/session/LoginPage.jsx */ 229);
+	var SignUpPage = __webpack_require__(/*! ./components/registrations/SignUpPage.jsx */ 232);
 	
+	var PostsIndex = __webpack_require__(/*! ./components/posts/index/Index.jsx */ 234);
 	var PostsNew = __webpack_require__(/*! ./components/posts/new/New.jsx */ 238);
 	var PostShow = __webpack_require__(/*! ./components/posts/show/Show.jsx */ 239);
 	
 	
 	module.exports = (
 	  React.createElement(Route, {name: "app", path: "/", handler: App}, 
-	    React.createElement(DefaultRoute, {name: "posts", handler: PostsView}), 
+	    React.createElement(DefaultRoute, {name: "posts", handler: PostsIndex}), 
 	    React.createElement(Route, {name: "about", handler: AboutPage}), 
 	    React.createElement(Route, {name: "login", path: "/login", handler: LoginPage}), 
 	    React.createElement(Route, {name: "signup", path: "/signup", handler: SignUpPage}), 
@@ -26374,285 +26374,6 @@
 
 /***/ },
 /* 227 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/view.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(/*! react */ 3);
-	var Reflux = __webpack_require__(/*! reflux */ 201);
-	
-	var Navigation = __webpack_require__(/*! react-router */ 160).Navigation;
-	
-	var PostsList = __webpack_require__(/*! ./list.jsx */ 228);
-	var Post = __webpack_require__(/*! ./post.jsx */ 229);
-	var actions = __webpack_require__(/*! ../../actions/actions */ 225);
-	
-	var PostStore = __webpack_require__(/*! ../../stores/PostStore */ 230);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  mixins: [Reflux.ListenerMixin, Navigation],
-	
-	  getInitialState: function() {
-	    return { data: [], loading: true };
-	  },
-	
-	  componentDidMount: function() {
-	    // TODO: Разве это норм подход? один колбек решил бы все проблемы
-	    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
-	    // в сторе создаем отдельную локальную переменную/геттер
-	    // добавляем onChange...
-	
-	    this.listenTo(PostStore, this._onChange);
-	    actions.getPosts();
-	  },
-	
-	  _onChange: function(){
-	    if ( PostStore.getCreatePostFlash() ){
-	      // debugger;
-	      this.replaceWith('/login');
-	    };
-	
-	    this.setState({
-	      data: PostStore.posts(),
-	      loading: false
-	    });
-	  },
-	
-	  render: function() {
-	    var postsBlock = this.state.loading ? (
-	      React.createElement("div", {className: "posts"}, 
-	        React.createElement("div", {className: "posts-preloader-wrapper"}, 
-	          React.createElement("div", {className: "preloader"})
-	        )
-	      )
-	    ) : (
-	      React.createElement("div", {className: "posts"}, 
-	        React.createElement(PostsList, {data:  this.state.data})
-	      )
-	    );
-	
-	    return (
-	      React.createElement("div", {className: "content full-width"}, 
-	        React.createElement("label", null, "Sort by"), 
-	        React.createElement("select", null, 
-	          React.createElement("option", null, "upvotes"), 
-	          React.createElement("option", null, "newest"), 
-	          React.createElement("option", null, "comments")
-	        ), 
-	
-	        React.createElement("hr", null), 
-	         postsBlock, 
-	        React.createElement("hr", null), 
-	
-	        React.createElement("nav", {className: "pagination"}, 
-	          React.createElement("a", {className: "next-page", href: "#"}, "Load More Posts")
-	        )
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 228 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/list.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 3);
-	var Post = __webpack_require__(/*! ./post.jsx */ 229);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    var posts = this.props.data.map(function(post) {
-	      return (
-	        React.createElement(Post, {key: post.id, id: post.id, title: post.title, body: post.body, url: post.url, author_name: post.author_name})
-	      );
-	    });
-	
-	    return (
-	      React.createElement("ul", {className: "posts-list"}, 
-	        posts
-	      )
-	    );
-	  }
-	});
-
-
-/***/ },
-/* 229 */
-/*!*********************************************!*\
-  !*** ./app_react/components/posts/post.jsx ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	var React = __webpack_require__(/*! react */ 3);
-	
-	module.exports = React.createClass({displayName: "exports",
-	  render: function() {
-	    return (
-	      React.createElement("div", {className: "post cf"}, 
-	        React.createElement("div", {className: "post-link"}, 
-	          React.createElement("a", {href: '#/posts/'+this.props.id, className: "post-title"},  this.props.title), 
-	          React.createElement("span", {className: "hostname"}, 
-	            React.createElement("span", null, "("), 
-	            React.createElement("a", {href: "#"},  this.props.url), 
-	            React.createElement("span", null, ")")
-	          )
-	        ), 
-	        React.createElement("div", {className: "post-info"}, 
-	          React.createElement("div", {className: "posted-by"}, 
-	            React.createElement("a", {className: "upvote"}, 
-	              React.createElement("span", null, "90"), 
-	              React.createElement("span", null, " "), 
-	              React.createElement("i", {className: "fa fa-arrow-up"}
-	              )
-	            ), 
-	            React.createElement("span", {className: "post-info-item"}, 
-	              React.createElement("a", {href: "#"}, this.props.author_name)
-	            ), 
-	            React.createElement("span", {className: "post-info-item"}, "6 months ago"), 
-	            React.createElement("span", {className: "post-info-item"}, 
-	              React.createElement("a", {href: "#"}, "20 comments")
-	            )
-	          )
-	        )
-	      )
-	    );
-	  }
-	});
-	// TODO: Как заюзать, WTF?
-	//<Link to='post_show' className='post-title'>Sign In</Link>
-	// Хули круд такой тяжелый ?
-
-
-/***/ },
-/* 230 */
-/*!***************************************!*\
-  !*** ./app_react/stores/PostStore.js ***!
-  \***************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	__webpack_require__(/*! whatwg-fetch */ 224);
-	var Reflux = __webpack_require__(/*! reflux */ 201);
-	
-	var actions = __webpack_require__(/*! ../actions/actions */ 225);
-	
-	var _posts = [];
-	var _createPostFlashMessage = '';
-	var _newPost = null;
-	var _currentPost = null;
-	
-	module.exports = Reflux.createStore({
-	  init: function() {
-	    this.listenTo(actions.getPost, this.onGetPost);
-	    this.listenTo(actions.getPosts, this.onGetPosts);
-	    this.listenTo(actions.createNewPost, this.onCreateNewPost);
-	    this.listenTo(actions.successCreatePost, this.onSuccessCreatePost);
-	    this.listenTo(actions.unSuccessCreatePost, this.onUnSuccessCreatePost);
-	  },
-	
-	  getCreatePostFlash: function(){
-	    return _createPostFlashMessage;
-	  },
-	
-	  getNewPost: function(){
-	    return _newPost;
-	  },
-	
-	  setNewPost: function(value){
-	    _newPost = value;
-	  },
-	
-	  posts: function(){
-	    return _posts;
-	  },
-	
-	  currentPost: function(){
-	    return _currentPost;
-	  },
-	
-	  onGetPost: function(id) {
-	    fetch('/v1/posts/'+id, {
-	        headers: {
-	          'Authorization': sessionStorage.getItem('accessToken')
-	        }
-	      }).then(function(response) {
-	        return response.json()
-	      }).then(function(data) {
-	        if ( !data.error ){
-	          _currentPost = data;
-	          this.trigger();
-	        }
-	      }.bind(this));
-	  },
-	
-	  onGetPosts: function() {
-	    fetch('/v1/posts', {
-	      headers: {
-	        'Authorization': sessionStorage.getItem('accessToken')
-	      }
-	    }).then(function(response) {
-	        return response.json()
-	      }).then(function(data) {
-	        if ( data.error ){
-	          _createPostFlashMessage = data.error;
-	        } else {
-	          _posts = data;
-	        }
-	
-	        this.trigger();
-	      }.bind(this));
-	  },
-	
-	  onCreateNewPost: function(title, url) {
-	    fetch('/v1/posts', {
-	      method: 'post',
-	      headers: {
-	        'Accept': 'application/json',
-	        'Content-Type': 'application/json',
-	        'Authorization': sessionStorage.getItem('accessToken')
-	      },
-	      body: JSON.stringify({
-	        post: {
-	          title: title,
-	          url: url
-	        }
-	      })
-	    }).then( function(response) {
-	      return response.json()
-	    }).then(function(data) {
-	
-	      if (data.error){
-	        return actions.unSuccessCreatePost(data.error);
-	      }
-	
-	      actions.successCreatePost(data);
-	    })
-	  },
-	
-	  onSuccessCreatePost: function(newPost){
-	    // TODO: Правильный ли это подход для создания поста? - ебота какая-то получается? - слишком много движения для CRUD действий
-	    _createPostFlashMessage = '';
-	    _newPost = newPost;
-	    this.trigger();
-	  },
-	
-	  onUnSuccessCreatePost: function(errorMessage){
-	    _createPostFlashMessage = errorMessage;
-	    this.trigger();
-	  }
-	})
-
-
-/***/ },
-/* 231 */
 /*!***************************************************!*\
   !*** ./app_react/components/static/AboutPage.jsx ***!
   \***************************************************/
@@ -26662,7 +26383,7 @@
 	
 	var React = __webpack_require__(/*! react */ 3);
 	
-	var StaticInformationStore = __webpack_require__(/*! ../../stores/StaticInformationStore */ 232);
+	var StaticInformationStore = __webpack_require__(/*! ../../stores/StaticInformationStore */ 228);
 	
 	function getStateFromStores() {
 	  return {
@@ -26703,7 +26424,7 @@
 
 
 /***/ },
-/* 232 */
+/* 228 */
 /*!****************************************************!*\
   !*** ./app_react/stores/StaticInformationStore.js ***!
   \****************************************************/
@@ -26734,7 +26455,7 @@
 
 
 /***/ },
-/* 233 */
+/* 229 */
 /*!****************************************************!*\
   !*** ./app_react/components/session/LoginPage.jsx ***!
   \****************************************************/
@@ -26749,8 +26470,8 @@
 	
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 223);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 234);
-	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 235);
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 230);
+	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 231);
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 225);
 	
@@ -26821,7 +26542,7 @@
 
 
 /***/ },
-/* 234 */
+/* 230 */
 /*!****************************************************!*\
   !*** ./app_react/components/shared/SignButton.jsx ***!
   \****************************************************/
@@ -26858,7 +26579,7 @@
 
 
 /***/ },
-/* 235 */
+/* 231 */
 /*!******************************************************!*\
   !*** ./app_react/components/shared/FlashMessage.jsx ***!
   \******************************************************/
@@ -26885,7 +26606,7 @@
 
 
 /***/ },
-/* 236 */
+/* 232 */
 /*!***********************************************************!*\
   !*** ./app_react/components/registrations/SignUpPage.jsx ***!
   \***********************************************************/
@@ -26899,12 +26620,12 @@
 	var Navigation = __webpack_require__(/*! react-router */ 160).Navigation;
 	
 	var LoginStore = __webpack_require__(/*! ../../stores/LoginStore */ 223); // TODO: ПОЧЕМУ НЕ РАБОТАЕТ? - надо вешать два листенера!
-	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 237);
+	var RegistrationStore = __webpack_require__(/*! ../../stores/RegistrationStore */ 233);
 	
 	var actions = __webpack_require__(/*! ../../actions/actions */ 225);
 	
-	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 234);
-	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 235);
+	var SignButton = __webpack_require__(/*! ../shared/SignButton.jsx */ 230);
+	var FlashMessage = __webpack_require__(/*! ../shared/FlashMessage.jsx */ 231);
 	
 	function getStateFromStores() {
 	  return {
@@ -26980,7 +26701,7 @@
 
 
 /***/ },
-/* 237 */
+/* 233 */
 /*!***********************************************!*\
   !*** ./app_react/stores/RegistrationStore.js ***!
   \***********************************************/
@@ -27048,6 +26769,328 @@
 
 
 /***/ },
+/* 234 */
+/*!****************************************************!*\
+  !*** ./app_react/components/posts/index/Index.jsx ***!
+  \****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 3);
+	var Reflux = __webpack_require__(/*! reflux */ 201);
+	
+	var Navigation = __webpack_require__(/*! react-router */ 160).Navigation;
+	
+	var PostsList = __webpack_require__(/*! ./list.jsx */ 235);
+	
+	var actions = __webpack_require__(/*! ../../../actions/actions */ 225);
+	
+	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 237);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  mixins: [Reflux.ListenerMixin, Navigation],
+	
+	  // this.context.router.getCurrentQuery().pages
+	  getInitialState: function() {
+	    return {
+	      data: [],
+	      loading: true,
+	      currentPage: 1,
+	      lastPage: false
+	    };
+	  },
+	
+	  componentDidMount: function() {
+	
+	
+	    // TODO: Разве это норм подход? один колбек решил бы все проблемы
+	    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
+	    // в сторе создаем отдельную локальную переменную/геттер
+	    // добавляем onChange...
+	
+	    this.listenTo(PostStore, this._onChange);
+	    actions.getPosts(this.state.currentPage);
+	  },
+	
+	  _onChange: function(){
+	    if ( PostStore.getCreatePostFlash() ){
+	      // TODO: тупо как-то тут проверять - так как старница все равно отрисовуеться ( хоть и без данных )
+	      // поставить ответ от сервера большим - тогда долго будет редиректить...
+	      this.replaceWith('/login');
+	    };
+	
+	    // TODO: Два раза SetState был - это вообще нормально ???
+	    if ( PostStore.pageIsLast(this.state.currentPage) ){
+	      this.setState({
+	        lastPage: true
+	      });
+	    }
+	
+	    var _data = this.state.data.concat( PostStore.posts() );
+	    this.setState({
+	      data: _data,
+	      loading: false
+	    });
+	  },
+	
+	  getNextPagePosts: function(){
+	    // TODO: не обновляет сразу!!!
+	    var _currentPage = this.state.currentPage + 1;
+	    this.setState({ currentPage: _currentPage });
+	
+	    actions.getPosts( _currentPage );
+	  },
+	
+	  render: function() {
+	    var postsBlock = this.state.loading ? (
+	      React.createElement("div", {className: "posts"}, 
+	        React.createElement("div", {className: "posts-preloader-wrapper"}, 
+	          React.createElement("div", {className: "preloader"})
+	        )
+	      )
+	    ) : (
+	      React.createElement("div", {className: "posts"}, 
+	        React.createElement(PostsList, {data:  this.state.data})
+	      )
+	    );
+	
+	    var pagination = this.state.lastPage ? (
+	      null
+	    ) : (
+	      React.createElement("nav", {className: "pagination"}, 
+	        React.createElement("a", {className: "next-page", href: "#", onClick: this.getNextPagePosts}, "Load More Posts")
+	      )
+	    )
+	
+	    return (
+	      React.createElement("div", {className: "content full-width"}, 
+	        React.createElement("label", null, "Sort by"), 
+	        React.createElement("select", null, 
+	          React.createElement("option", null, "upvotes"), 
+	          React.createElement("option", null, "newest"), 
+	          React.createElement("option", null, "comments")
+	        ), 
+	
+	        React.createElement("hr", null), 
+	         postsBlock, 
+	        React.createElement("hr", null), 
+	
+	         pagination 
+	      )
+	    );
+	  }
+	});
+	
+	// TODO: СДЕЛАТЬ НОРМА ПАГИНАААААЦИИЮ
+
+
+/***/ },
+/* 235 */
+/*!***************************************************!*\
+  !*** ./app_react/components/posts/index/list.jsx ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 3);
+	var Post = __webpack_require__(/*! ./post.jsx */ 236);
+	
+	// TODO: как-то много параметров! - херь какая-то :)
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    var posts = this.props.data.map(function(post) {
+	      return (
+	        React.createElement(Post, {key: post.id, id: post.id, title: post.title, body: post.body, url: post.url, author_name: post.author_name, strf_created_at: post.strf_created_at, comments_count: post.comments_count})
+	      );
+	    });
+	
+	    return (
+	      React.createElement("ul", {className: "posts-list"}, 
+	        posts
+	      )
+	    );
+	  }
+	});
+
+
+/***/ },
+/* 236 */
+/*!***************************************************!*\
+  !*** ./app_react/components/posts/index/post.jsx ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(/*! react */ 3);
+	
+	module.exports = React.createClass({displayName: "exports",
+	  render: function() {
+	    return (
+	      React.createElement("div", {className: "post cf"}, 
+	        React.createElement("div", {className: "post-link"}, 
+	          React.createElement("a", {href: '#/posts/'+this.props.id, className: "post-title"},  this.props.title), 
+	          React.createElement("span", {className: "hostname"}, 
+	            React.createElement("span", null, "("), 
+	            React.createElement("a", {href: "#"},  this.props.url), 
+	            React.createElement("span", null, ")")
+	          )
+	        ), 
+	        React.createElement("div", {className: "post-info"}, 
+	          React.createElement("div", {className: "posted-by"}, 
+	            React.createElement("a", {className: "upvote"}, 
+	              React.createElement("span", null, "90"), 
+	              React.createElement("span", null, " "), 
+	              React.createElement("i", {className: "fa fa-arrow-up"}
+	              )
+	            ), 
+	            React.createElement("span", {className: "post-info-item"}, 
+	              React.createElement("a", {href: "#"},  this.props.author_name)
+	            ), 
+	            React.createElement("span", {className: "post-info-item"},  this.props.strf_created_at), 
+	            React.createElement("span", {className: "post-info-item"}, 
+	               this.props.comments_count
+	            )
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+	// TODO: Как заюзать, WTF?
+	//<Link to='post_show' className='post-title'>Sign In</Link>
+	// Хули круд такой тяжелый ?
+
+
+/***/ },
+/* 237 */
+/*!***************************************!*\
+  !*** ./app_react/stores/PostStore.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	__webpack_require__(/*! whatwg-fetch */ 224);
+	var Reflux = __webpack_require__(/*! reflux */ 201);
+	
+	var actions = __webpack_require__(/*! ../actions/actions */ 225);
+	
+	var _posts = [];
+	var _createPostFlashMessage = '';
+	var _newPostId = null;
+	var _currentPost = null;
+	var _lastPage = null;
+	
+	module.exports = Reflux.createStore({
+	  init: function() {
+	    this.listenTo(actions.getPost, this.onGetPost);
+	    this.listenTo(actions.getPosts, this.onGetPosts);
+	    this.listenTo(actions.createNewPost, this.onCreateNewPost);
+	    this.listenTo(actions.successCreatePost, this.onSuccessCreatePost);
+	    this.listenTo(actions.unSuccessCreatePost, this.onUnSuccessCreatePost);
+	  },
+	
+	  getCreatePostFlash: function(){
+	    return _createPostFlashMessage;
+	  },
+	
+	  getNewPostId: function(){
+	    return _newPostId;
+	  },
+	
+	  setNewPostId: function(value){
+	    _newPostId = value;
+	  },
+	
+	  posts: function(){
+	    return _posts;
+	  },
+	
+	  currentPost: function(){
+	    return _currentPost;
+	  },
+	
+	  pageIsLast: function(page){
+	    return _lastPage === page;
+	  },
+	
+	  onGetPost: function(id) {
+	    fetch('/v1/posts/'+id, {
+	        headers: {
+	          'Authorization': sessionStorage.getItem('accessToken')
+	        }
+	      }).then(function(response) {
+	        return response.json()
+	      }).then(function(data) {
+	        if ( !data.error ){
+	          _currentPost = data;
+	          this.trigger();
+	        }
+	      }.bind(this));
+	  },
+	
+	  onGetPosts: function(currentPage) {
+	    var _currentPage = currentPage || 1;
+	
+	    // TODO: Find something like query... for currentPage.
+	    fetch('/v1/posts?page=' + _currentPage, {
+	      headers: {
+	        'Authorization': sessionStorage.getItem('accessToken')
+	      }
+	    }).then(function(response) {
+	        return response.json();
+	      }).then(function(data) {
+	        if ( data.error ){
+	          _createPostFlashMessage = data.error;
+	        } else {
+	          _lastPage = data['total_pages'];
+	          _posts = data['posts'];
+	        }
+	
+	        this.trigger();
+	      }.bind(this));
+	  },
+	
+	  onCreateNewPost: function(title, url) {
+	    fetch('/v1/posts', {
+	      method: 'post',
+	      headers: {
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json',
+	        'Authorization': sessionStorage.getItem('accessToken')
+	      },
+	      body: JSON.stringify({
+	        post: {
+	          title: title,
+	          url: url
+	        }
+	      })
+	    }).then( function(response) {
+	      return response.json()
+	    }).then(function(data) {
+	      if (data.error){
+	        return actions.unSuccessCreatePost(data.error);
+	      }
+	
+	      actions.successCreatePost(data.id);
+	    })
+	  },
+	
+	  onSuccessCreatePost: function(postId){
+	    // TODO: Правильный ли это подход для создания поста? - ебота какая-то получается? - слишком много движения для CRUD действий
+	    _createPostFlashMessage = '';
+	    _newPostId = postId;
+	    this.trigger();
+	  },
+	
+	  onUnSuccessCreatePost: function(errorMessage){
+	    _createPostFlashMessage = errorMessage;
+	    this.trigger();
+	  }
+	})
+
+
+/***/ },
 /* 238 */
 /*!************************************************!*\
   !*** ./app_react/components/posts/new/New.jsx ***!
@@ -27061,11 +27104,11 @@
 	
 	var Navigation = __webpack_require__(/*! react-router */ 160).Navigation;
 	
-	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 230);
+	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 237);
 	var LoginStore = __webpack_require__(/*! ../../../stores/LoginStore */ 223);
 	
-	var SignButton = __webpack_require__(/*! ../../shared/SignButton.jsx */ 234);
-	var FlashMessage = __webpack_require__(/*! ../../shared/FlashMessage.jsx */ 235);
+	var SignButton = __webpack_require__(/*! ../../shared/SignButton.jsx */ 230);
+	var FlashMessage = __webpack_require__(/*! ../../shared/FlashMessage.jsx */ 231);
 	
 	var actions = __webpack_require__(/*! ../../../actions/actions */ 225);
 	
@@ -27106,11 +27149,11 @@
 	  },
 	
 	  _onChange: function(){
-	    var newPost = PostStore.getNewPost()
+	    var newPostId = PostStore.getNewPostId()
 	
-	    if( PostStore.getNewPost() ){
-	      PostStore.setNewPost = null;
-	      this.replaceWith('/posts/' + newPost.id);
+	    if( newPostId ){
+	      PostStore.setNewPostId = null;
+	      this.replaceWith('/posts/' + newPostId);
 	    } else {
 	      this.refs.title.getDOMNode().value = '';
 	      this.refs.url.getDOMNode().value = '';
@@ -27159,7 +27202,7 @@
 	
 	var actions = __webpack_require__(/*! ../../../actions/actions */ 225);
 	
-	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 230);
+	var PostStore = __webpack_require__(/*! ../../../stores/PostStore */ 237);
 	
 	module.exports = React.createClass({displayName: "exports",
 	  mixins: [Reflux.ListenerMixin],
@@ -27218,7 +27261,7 @@
 	              )
 	            ), 
 	            React.createElement("span", {className: "post-info-item"}, 
-	              React.createElement("a", {href: "#"}, "echenley")
+	              React.createElement("a", {href: "#"},  this.state.data.author_name)
 	            ), 
 	            React.createElement("span", {className: "post-info-item"},  this.state.data.strf_created_at), 
 	            React.createElement("span", {className: "post-info-item"}, 

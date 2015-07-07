@@ -7,8 +7,9 @@ var actions = require('../actions/actions');
 
 var _posts = [];
 var _createPostFlashMessage = '';
-var _newPost = null;
+var _newPostId = null;
 var _currentPost = null;
+var _lastPage = null;
 
 module.exports = Reflux.createStore({
   init: function() {
@@ -23,12 +24,12 @@ module.exports = Reflux.createStore({
     return _createPostFlashMessage;
   },
 
-  getNewPost: function(){
-    return _newPost;
+  getNewPostId: function(){
+    return _newPostId;
   },
 
-  setNewPost: function(value){
-    _newPost = value;
+  setNewPostId: function(value){
+    _newPostId = value;
   },
 
   posts: function(){
@@ -37,6 +38,10 @@ module.exports = Reflux.createStore({
 
   currentPost: function(){
     return _currentPost;
+  },
+
+  pageIsLast: function(page){
+    return _lastPage === page;
   },
 
   onGetPost: function(id) {
@@ -54,18 +59,22 @@ module.exports = Reflux.createStore({
       }.bind(this));
   },
 
-  onGetPosts: function() {
-    fetch('/v1/posts', {
+  onGetPosts: function(currentPage) {
+    var _currentPage = currentPage || 1;
+
+    // TODO: Find something like query... for currentPage.
+    fetch('/v1/posts?page=' + _currentPage, {
       headers: {
         'Authorization': sessionStorage.getItem('accessToken')
       }
     }).then(function(response) {
-        return response.json()
+        return response.json();
       }).then(function(data) {
         if ( data.error ){
           _createPostFlashMessage = data.error;
         } else {
-          _posts = data;
+          _lastPage = data['total_pages'];
+          _posts = data['posts'];
         }
 
         this.trigger();
@@ -89,19 +98,18 @@ module.exports = Reflux.createStore({
     }).then( function(response) {
       return response.json()
     }).then(function(data) {
-
       if (data.error){
         return actions.unSuccessCreatePost(data.error);
       }
 
-      actions.successCreatePost(data);
+      actions.successCreatePost(data.id);
     })
   },
 
-  onSuccessCreatePost: function(newPost){
+  onSuccessCreatePost: function(postId){
     // TODO: Правильный ли это подход для создания поста? - ебота какая-то получается? - слишком много движения для CRUD действий
     _createPostFlashMessage = '';
-    _newPost = newPost;
+    _newPostId = postId;
     this.trigger();
   },
 
