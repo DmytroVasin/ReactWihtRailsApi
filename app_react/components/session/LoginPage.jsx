@@ -43,12 +43,14 @@ module.exports = React.createClass({
   },
 
   _onChange: function(){
-    // TODO: тупо как-то а если три состояния - то метов onChange будет пиздец какой большой!!!
     if ( LoginStore.isLoggedIn() ){
       this.replaceWith('/about');
+      // ретурн забыл!
     } else {
       this.refs.email.getDOMNode().value = '';
       this.refs.password.getDOMNode().value = '';
+      // сбрасывать инпуты через реакт!
+      // дефолтный велью брать со стейта и сделать сет стейт
     }
 
     this.setState( getStateFromStores() );

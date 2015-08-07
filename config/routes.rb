@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
     resource :about, only: [:show]
     resources :posts, only: [:index, :create, :show]
+
+    resources :users
   end
 end
 # curl http://127.0.0.1:3000/v1/login --data "user[email]=user@example.com&user[password]=password"

@@ -51,6 +51,7 @@ module.exports = React.createClass({
 
     if ( LoginStore.isLoggedIn() ){
       this.replaceWith('/about');
+      // нет ретурна!!!
     } else {
       getStateFromStores();
     }

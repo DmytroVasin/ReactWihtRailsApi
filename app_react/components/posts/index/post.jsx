@@ -33,6 +33,3 @@ module.exports = React.createClass({
     );
   }
 });
-// TODO: Как заюзать, WTF?
-//<Link to='post_show' className='post-title'>Sign In</Link>
-// Хули круд такой тяжелый ?

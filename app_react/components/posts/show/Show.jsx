@@ -15,18 +15,12 @@ module.exports = React.createClass({
   },
 
   componentDidMount: function() {
-    // TODO: Разве это норм подход? один колбек решил бы все проблемы
-    // http://rackt.github.io/react-router/ - пример с колбеком на оф сайте
-    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
-    // в сторе создаем отдельную локальную переменную/геттер
-    // добавляем onChange...
-
-    var _id = this.props.params.id;
-    this.listenTo(PostStore, this._onChange);
-    actions.getPost(_id);
+    this.listenTo( PostStore, this._onChange );
+    actions.getPost( this.props.params.id );
   },
 
   _onChange: function(){
+    // смотри на index - как там сделано
     this.setState({
       data: PostStore.currentPost(),
       loading: false

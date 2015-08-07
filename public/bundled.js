@@ -24230,16 +24230,18 @@
 	
 	module.exports = React.createClass({displayName: "exports",
 	  mixins: [Reflux.ListenerMixin],
-	
 	  getInitialState: function() {
 	    return getStateFromStores();
 	  },
 	
 	  componentDidMount: function() {
+	    // Заменить на: LoginStote.listenTo(this._onChange)
+	    // И выпилить миксин
 	    this.listenTo(LoginStore, this._onChange);
 	  },
 	
 	  _onChange: function() {
+	    // тут проверить currentState <> previousState
 	    this.setState( getStateFromStores() );
 	  },
 	
@@ -26326,8 +26328,8 @@
 	
 	  logout: function() {
 	    actions.logout();
-	    // TODO: Как сделать редирект после разлогинивания?
-	    // обычно бы повесился на тригер события - но это тупо - тут колбеком подойдет как пить дать!
+	    // надо слушать роутер!
+	    // this.replaceWith('/about');
 	  },
 	
 	  render: function() {
@@ -26506,12 +26508,14 @@
 	  },
 	
 	  _onChange: function(){
-	    // TODO: тупо как-то а если три состояния - то метов onChange будет пиздец какой большой!!!
 	    if ( LoginStore.isLoggedIn() ){
 	      this.replaceWith('/about');
+	      // ретурн забыл!
 	    } else {
 	      this.refs.email.getDOMNode().value = '';
 	      this.refs.password.getDOMNode().value = '';
+	      // сбрасывать инпуты через реакт!
+	      // дефолтный велью брать со стейта и сделать сет стейт
 	    }
 	
 	    this.setState( getStateFromStores() );
@@ -26591,15 +26595,12 @@
 	
 	module.exports = React.createClass({displayName: "exports",
 	  render: function() {
-	
-	    var flashMessage = this.props.errorMessage ? (
-	      React.createElement("div", {className: "error login-error"},  this.props.errorMessage)
-	    ) : (
-	      null // TODO: где-то читал что реакт.jsx должен возвращать <div> элемент! - но тут я никуя не возвращаю! - кули работает?
-	    );
+	    if (!this.props.errorMessage) {
+	      return null;
+	    }
 	
 	    return (
-	      flashMessage
+	      React.createElement("div", {className: "error login-error"},  this.props.errorMessage)
 	    );
 	  }
 	});
@@ -26665,6 +26666,7 @@
 	
 	    if ( LoginStore.isLoggedIn() ){
 	      this.replaceWith('/about');
+	      // нет ретурна!!!
 	    } else {
 	      getStateFromStores();
 	    }
@@ -26791,51 +26793,52 @@
 	module.exports = React.createClass({displayName: "exports",
 	  mixins: [Reflux.ListenerMixin, Navigation],
 	
-	  // this.context.router.getCurrentQuery().pages
 	  getInitialState: function() {
 	    return {
 	      data: [],
-	      loading: true,
+	      // data: PostStore.posts(),
+	      loading: true,//должно идти со стора!
 	      currentPage: 1,
 	      lastPage: false
 	    };
 	  },
 	
 	  componentDidMount: function() {
-	
-	
-	    // TODO: Разве это норм подход? один колбек решил бы все проблемы
-	    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
-	    // в сторе создаем отдельную локальную переменную/геттер
-	    // добавляем onChange...
-	
 	    this.listenTo(PostStore, this._onChange);
 	    actions.getPosts(this.state.currentPage);
 	  },
 	
 	  _onChange: function(){
 	    if ( PostStore.getCreatePostFlash() ){
-	      // TODO: тупо как-то тут проверять - так как старница все равно отрисовуеться ( хоть и без данных )
-	      // поставить ответ от сервера большим - тогда долго будет редиректить...
 	      this.replaceWith('/login');
+	      // проверить здесь ретур!
+	      // debugger;
 	    };
 	
-	    // TODO: Два раза SetState был - это вообще нормально ???
 	    if ( PostStore.pageIsLast(this.state.currentPage) ){
 	      this.setState({
 	        lastPage: true
 	      });
 	    }
 	
+	    // перенести формирование данных в стор - что бы стор возвращал посты для страницы
 	    var _data = this.state.data.concat( PostStore.posts() );
 	    this.setState({
 	      data: _data,
 	      loading: false
 	    });
+	
+	    // hideLoader()
 	  },
 	
+	  // Хелпер метод - !
+	  // hideLoader: function(){
+	  //   setState({
+	  //     loading: false;
+	  //   })
+	  // }
+	
 	  getNextPagePosts: function(){
-	    // TODO: не обновляет сразу!!!
 	    var _currentPage = this.state.currentPage + 1;
 	    this.setState({ currentPage: _currentPage });
 	
@@ -26881,8 +26884,6 @@
 	    );
 	  }
 	});
-	
-	// TODO: СДЕЛАТЬ НОРМА ПАГИНАААААЦИИЮ
 
 
 /***/ },
@@ -26895,12 +26896,12 @@
 	var React = __webpack_require__(/*! react */ 3);
 	var Post = __webpack_require__(/*! ./post.jsx */ 236);
 	
-	// TODO: как-то много параметров! - херь какая-то :)
 	
 	module.exports = React.createClass({displayName: "exports",
 	  render: function() {
 	    var posts = this.props.data.map(function(post) {
 	      return (
+	        // post прокидывать!
 	        React.createElement(Post, {key: post.id, id: post.id, title: post.title, body: post.body, url: post.url, author_name: post.author_name, strf_created_at: post.strf_created_at, comments_count: post.comments_count})
 	      );
 	    });
@@ -26956,9 +26957,6 @@
 	    );
 	  }
 	});
-	// TODO: Как заюзать, WTF?
-	//<Link to='post_show' className='post-title'>Sign In</Link>
-	// Хули круд такой тяжелый ?
 
 
 /***/ },
@@ -27023,6 +27021,8 @@
 	        return response.json()
 	      }).then(function(data) {
 	        if ( !data.error ){
+	          // _currentPost = data.post;
+	          // API подправить.
 	          _currentPost = data;
 	          this.trigger();
 	        }
@@ -27032,7 +27032,6 @@
 	  onGetPosts: function(currentPage) {
 	    var _currentPage = currentPage || 1;
 	
-	    // TODO: Find something like query... for currentPage.
 	    fetch('/v1/posts?page=' + _currentPage, {
 	      headers: {
 	        'Authorization': sessionStorage.getItem('accessToken')
@@ -27065,19 +27064,24 @@
 	          url: url
 	        }
 	      })
-	    }).then( function(response) {
+	    }).then(function(response) {
 	      return response.json()
 	    }).then(function(data) {
 	      if (data.error){
-	        return actions.unSuccessCreatePost(data.error);
+	        actions.unSuccessCreatePost(data.error);
+	        // unSuccessCreatePost(data.error);
+	        return;
 	      }
 	
 	      actions.successCreatePost(data.id);
+	      // successCreatePost(data.id);
 	    })
+	    // }.bind(this))
 	  },
 	
 	  onSuccessCreatePost: function(postId){
-	    // TODO: Правильный ли это подход для создания поста? - ебота какая-то получается? - слишком много движения для CRUD действий
+	  // ПЕРЕПИСАТЬ!
+	  // successCreatePost: function(postId){
 	    _createPostFlashMessage = '';
 	    _newPostId = postId;
 	    this.trigger();
@@ -27123,8 +27127,12 @@
 	  mixins: [Reflux.ListenerMixin, Navigation],
 	
 	  getInitialState: function() {
-	    // TODO: Где я должен ставить редирект? мб в роутах как-то?
-	    if ( LoginStore.isLoggedIn() ){} else { this.replaceWith('/login'); }
+	    // посмотреть документацию по роутеру
+	    // компонент didmount
+	    // редирект на роутинге
+	    if ( !LoginStore.isLoggedIn() ) {
+	      this.replaceWith('/login');
+	    }
 	
 	    return getStateFromStores();
 	  },
@@ -27142,7 +27150,8 @@
 	
 	
 	  componentDidMount: function() {
-	    this.listenTo(LoginStore, this._onChange); // TODO: СХЕРАЛИ если я убираю эту строчку - я не могу обращаться к Стору???
+	    // не убирать - проверить!!!
+	    // this.listenTo(LoginStore, this._onChange); // TODO: СХЕРАЛИ если я убираю эту строчку - я не могу обращаться к Стору???
 	    // Как сделать обращение к стору без навешивания onChange?
 	
 	    this.listenTo(PostStore, this._onChange);
@@ -27165,6 +27174,7 @@
 	  render: function() {
 	    // TODO: Как сделать затемнения и переходы - как в примере: http://henleyedition.com/react-news/
 	    // Типо открываеться в попапе и меняеться URL.
+	    // React-modal: https://github.com/rackt/react-modal
 	    return (
 	      React.createElement("div", {className: "new-post md-modal"}, 
 	        React.createElement("form", {className: "new-post-form", onSubmit: this._onSubmit}, 
@@ -27212,18 +27222,12 @@
 	  },
 	
 	  componentDidMount: function() {
-	    // TODO: Разве это норм подход? один колбек решил бы все проблемы
-	    // http://rackt.github.io/react-router/ - пример с колбеком на оф сайте
-	    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
-	    // в сторе создаем отдельную локальную переменную/геттер
-	    // добавляем onChange...
-	
-	    var _id = this.props.params.id;
-	    this.listenTo(PostStore, this._onChange);
-	    actions.getPost(_id);
+	    this.listenTo( PostStore, this._onChange );
+	    actions.getPost( this.props.params.id );
 	  },
 	
 	  _onChange: function(){
+	    // смотри на index - как там сделано
 	    this.setState({
 	      data: PostStore.currentPost(),
 	      loading: false

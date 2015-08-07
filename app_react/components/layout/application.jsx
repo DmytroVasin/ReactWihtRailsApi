@@ -17,16 +17,18 @@ function getStateFromStores() {
 
 module.exports = React.createClass({
   mixins: [Reflux.ListenerMixin],
-
   getInitialState: function() {
     return getStateFromStores();
   },
 
   componentDidMount: function() {
+    // Заменить на: LoginStote.listenTo(this._onChange)
+    // И выпилить миксин
     this.listenTo(LoginStore, this._onChange);
   },
 
   _onChange: function() {
+    // тут проверить currentState <> previousState
     this.setState( getStateFromStores() );
   },
 

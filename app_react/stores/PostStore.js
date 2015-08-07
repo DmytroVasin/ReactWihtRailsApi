@@ -53,6 +53,8 @@ module.exports = Reflux.createStore({
         return response.json()
       }).then(function(data) {
         if ( !data.error ){
+          // _currentPost = data.post;
+          // API подправить.
           _currentPost = data;
           this.trigger();
         }
@@ -62,7 +64,6 @@ module.exports = Reflux.createStore({
   onGetPosts: function(currentPage) {
     var _currentPage = currentPage || 1;
 
-    // TODO: Find something like query... for currentPage.
     fetch('/v1/posts?page=' + _currentPage, {
       headers: {
         'Authorization': sessionStorage.getItem('accessToken')
@@ -95,19 +96,24 @@ module.exports = Reflux.createStore({
           url: url
         }
       })
-    }).then( function(response) {
+    }).then(function(response) {
       return response.json()
     }).then(function(data) {
       if (data.error){
-        return actions.unSuccessCreatePost(data.error);
+        actions.unSuccessCreatePost(data.error);
+        // unSuccessCreatePost(data.error);
+        return;
       }
 
       actions.successCreatePost(data.id);
+      // successCreatePost(data.id);
     })
+    // }.bind(this))
   },
 
   onSuccessCreatePost: function(postId){
-    // TODO: Правильный ли это подход для создания поста? - ебота какая-то получается? - слишком много движения для CRUD действий
+  // ПЕРЕПИСАТЬ!
+  // successCreatePost: function(postId){
     _createPostFlashMessage = '';
     _newPostId = postId;
     this.trigger();

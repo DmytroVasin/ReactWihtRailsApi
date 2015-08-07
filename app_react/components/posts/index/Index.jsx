@@ -14,51 +14,52 @@ var PostStore = require('../../../stores/PostStore');
 module.exports = React.createClass({
   mixins: [Reflux.ListenerMixin, Navigation],
 
-  // this.context.router.getCurrentQuery().pages
   getInitialState: function() {
     return {
       data: [],
-      loading: true,
+      // data: PostStore.posts(),
+      loading: true,//должно идти со стора!
       currentPage: 1,
       lastPage: false
     };
   },
 
   componentDidMount: function() {
-
-
-    // TODO: Разве это норм подход? один колбек решил бы все проблемы
-    // а тут мы делаем запрос на компонент дид моунт - вешаем листенер на триггер
-    // в сторе создаем отдельную локальную переменную/геттер
-    // добавляем onChange...
-
     this.listenTo(PostStore, this._onChange);
     actions.getPosts(this.state.currentPage);
   },
 
   _onChange: function(){
     if ( PostStore.getCreatePostFlash() ){
-      // TODO: тупо как-то тут проверять - так как старница все равно отрисовуеться ( хоть и без данных )
-      // поставить ответ от сервера большим - тогда долго будет редиректить...
       this.replaceWith('/login');
+      // проверить здесь ретур!
+      // debugger;
     };
 
-    // TODO: Два раза SetState был - это вообще нормально ???
     if ( PostStore.pageIsLast(this.state.currentPage) ){
       this.setState({
         lastPage: true
       });
     }
 
+    // перенести формирование данных в стор - что бы стор возвращал посты для страницы
     var _data = this.state.data.concat( PostStore.posts() );
     this.setState({
       data: _data,
       loading: false
     });
+
+    // hideLoader()
   },
 
+  // Хелпер метод - !
+  // hideLoader: function(){
+  //   setState({
+  //     loading: false;
+  //   })
+  // }
+
   getNextPagePosts: function(){
-    // TODO: не обновляет сразу!!!
     var _currentPage = this.state.currentPage + 1;
     this.setState({ currentPage: _currentPage });
 
@@ -104,5 +105,3 @@ module.exports = React.createClass({
     );
   }
 });
-
-// TODO: СДЕЛАТЬ НОРМА ПАГИНАААААЦИИЮ

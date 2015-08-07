@@ -24,8 +24,12 @@ module.exports = React.createClass({
   mixins: [Reflux.ListenerMixin, Navigation],
 
   getInitialState: function() {
-    // TODO: Где я должен ставить редирект? мб в роутах как-то?
-    if ( LoginStore.isLoggedIn() ){} else { this.replaceWith('/login'); }
+    // посмотреть документацию по роутеру
+    // компонент didmount
+    // редирект на роутинге
+    if ( !LoginStore.isLoggedIn() ) {
+      this.replaceWith('/login');
+    }
 
     return getStateFromStores();
   },
@@ -43,7 +47,8 @@ module.exports = React.createClass({
 
 
   componentDidMount: function() {
-    this.listenTo(LoginStore, this._onChange); // TODO: СХЕРАЛИ если я убираю эту строчку - я не могу обращаться к Стору???
+    // не убирать - проверить!!!
+    // this.listenTo(LoginStore, this._onChange); // TODO: СХЕРАЛИ если я убираю эту строчку - я не могу обращаться к Стору???
     // Как сделать обращение к стору без навешивания onChange?
 
     this.listenTo(PostStore, this._onChange);
@@ -66,6 +71,7 @@ module.exports = React.createClass({
   render: function() {
     // TODO: Как сделать затемнения и переходы - как в примере: http://henleyedition.com/react-news/
     // Типо открываеться в попапе и меняеться URL.
+    // React-modal: https://github.com/rackt/react-modal
     return (
       <div className='new-post md-modal'>
         <form className='new-post-form' onSubmit={this._onSubmit}>
